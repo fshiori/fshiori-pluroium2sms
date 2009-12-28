@@ -263,7 +263,7 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 					String resp = responseText.getText().toString();
 					Log.d(TAG, "Resp: " + resp);
 					plurkHelper.addResponse(plurkId, 
-							PluroidApplication.qualifiers[responseQualifier.getSelectedItemPosition()], 
+							PluroiumApplication.qualifiers[responseQualifier.getSelectedItemPosition()], 
 							resp); 
 					msgHandler.sendEmptyMessage(MSG_RESPOND_DONE);
 				}

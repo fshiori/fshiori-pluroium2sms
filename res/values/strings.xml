@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, PlurkActivity!</string>
-    <string name="app_name">Pluroid</string>
+    
+    <string name="app_name">Pluroium</string>
     
     <string name="plurk">Plurk</string>
     <string name="ok">Ok</string>
@@ -9,10 +9,10 @@
     <string name="upload">Upload</string>
     
     <!-- headers -->
-    <string name="header_login">Pluroid - Login</string>
-    <string name="header_all">Pluroid - All plurks</string>
-    <string name="header_compose">Pluroid - Compose a plurk</string>
-    <string name="header_sharephoto">Pluroid - Share a photo</string>
+    <string name="header_login">Pluroium - Login</string>
+    <string name="header_all">Pluroium - All plurks</string>
+    <string name="header_compose">Pluroium - Compose a plurk</string>
+    <string name="header_sharephoto">Pluroium - Share a photo</string>
     
     <!-- LaunchActivity -->
     <string name="login_name_title">Username or Email:</string>
@@ -57,7 +57,7 @@
     <string name="pref_refresh_title">Refresh</string>
     <string name="pref_refresh_summary">Automatically update plurks</string>    
     <string name="pref_refresh_interval_title">Refresh interval</string>
-    <string name="pref_refresh_interval_summary">How long will Pluroid update plurks</string>
+    <string name="pref_refresh_interval_summary">How long will Pluroium update plurks</string>
     <string name="pref_notification_title">Notification</string>
     <string name="pref_notification_summary">Show notification on updates</string>
     <string name="pref_notify_vibrate_title">Vibrate</string>

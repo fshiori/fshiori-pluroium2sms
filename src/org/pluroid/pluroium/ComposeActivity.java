@@ -152,7 +152,7 @@ public class ComposeActivity extends Activity implements View.OnClickListener {
 			showDialog(DIALOG_PLURKING);
 			new Thread(){
 				public void run() {
-					plurkHelper.addPlurk(PluroidApplication.qualifiers[plurkQualifier.getSelectedItemPosition()],
+					plurkHelper.addPlurk(PluroiumApplication.qualifiers[plurkQualifier.getSelectedItemPosition()],
 							plurkContent.getText().toString(), true);
 					msgHandler.sendEmptyMessage(MSG_PLURK_DONE);
 				}

@@ -2,7 +2,7 @@ package org.pluroid.pluroium;
 
 import android.app.Application;
 
-public class PluroidApplication extends Application {
+public class PluroiumApplication extends Application {
 
 	public static String[] qualifiers = {
         "says",

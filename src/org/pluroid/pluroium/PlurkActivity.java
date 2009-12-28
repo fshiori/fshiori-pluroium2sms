@@ -522,7 +522,7 @@ public class PlurkActivity extends Activity
 	    		loadPlurks();
 				break;
 			case MSG_SWITCH_VIEW:
-				headerText.setText("Pluroid - " + getResources().getStringArray(R.array.plurk_types)[currentPlurksView]);
+				headerText.setText("Pluroium - " + getResources().getStringArray(R.array.plurk_types)[currentPlurksView]);
 	    		clearTimeStamp();
 				listFooter.setText(R.string.plurk_list_loading_title);
 				loadPlurks();

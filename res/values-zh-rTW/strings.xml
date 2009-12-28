@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Pluroid</string>
+    <string name="app_name">Pluroium</string>
     
     <string name="plurk">Plurk</string>
     <string name="ok">確定</string>
@@ -8,10 +8,10 @@
     <string name="upload">上傳</string>
     
     <!-- headers -->
-    <string name="header_login">Pluroid - 登入</string>
-    <string name="header_all">Pluroid - 所有的 plurk</string>
-    <string name="header_compose">Pluroid - 編寫 plurk</string>
-    <string name="header_sharephoto">Pluroid - 分享圖片</string>
+    <string name="header_login">Pluroium - 登入</string>
+    <string name="header_all">Pluroium - 所有的 plurk</string>
+    <string name="header_compose">Pluroium - 編寫 plurk</string>
+    <string name="header_sharephoto">Pluroium - 分享圖片</string>
     
     <!-- LaunchActivity -->
     <string name="login_name_title">帳號或 Email:</string>
@@ -54,7 +54,7 @@
     <string name="pref_refresh_title">Refresh</string>
     <string name="pref_refresh_summary">Automatically update plurks</string>    
     <string name="pref_refresh_interval_title">Refresh interval</string>
-    <string name="pref_refresh_interval_summary">How long will Pluroid update plurks</string>
+    <string name="pref_refresh_interval_summary">How long will Pluroium update plurks</string>
     <string name="pref_notification_title">Notification</string>
     <string name="pref_notification_summary">Show notification on updates</string>
     <string name="pref_notify_vibrate_title">Vibrate</string>

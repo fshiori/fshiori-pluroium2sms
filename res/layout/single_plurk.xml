@@ -19,7 +19,7 @@
             android:fadingEdge="horizontal"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:text="Pluroid" />
+            android:text="Pluroium" />
             
         <ProgressBar android:id="@+id/single_load_progressing" 
             style="?android:attr/progressBarStyleSmall"
