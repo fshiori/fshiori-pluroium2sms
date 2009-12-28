@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pluroid</string>
+    
+    <string name="plurk">Plurk</string>
+    <string name="ok">確定</string>
+    <string name="cancel">取消</string>
+    <string name="upload">上傳</string>
+    
+    <!-- headers -->
+    <string name="header_login">Pluroid - 登入</string>
+    <string name="header_all">Pluroid - 所有的 plurk</string>
+    <string name="header_compose">Pluroid - 編寫 plurk</string>
+    <string name="header_sharephoto">Pluroid - 分享圖片</string>
+    
+    <!-- LaunchActivity -->
+    <string name="login_name_title">帳號或 Email:</string>
+    <string name="login_password_title">密碼:</string>
+    <string name="login_remember_title">記住我</string>
+    <string name="login_button_text">登入</string>
+    <string name="loging_button_text">正在登入...</string>
+    <string name="not_member_text">還沒有 plurk 帳號嗎?</string>
+    <string name="signup_button_text">註冊 (即將開放)</string>
+    <string name="login_fail_dialog_title">登入失敗</string>
+    <string name="login_fail_message">請確定您輸入了正確的帳號及密碼</string>
+    
+    <!-- PlurkActivity -->
+    <string name="plurk_button_text">Plurk</string>
+    <string name="plurk_text_hint">您在做什麼呢?</string>
+    <string name="plurk_qualifier_label">選擇動作</string>
+    <string name="plurking">噗浪中，請稍候...</string>
+    
+    <string name="menu_refresh_title">重新讀取</string>
+    <string name="menu_compose_title">編寫</string>
+    <string name="menu_view">檢視...</string>
+    <string name="menu_upload_photo_title">分享照片</string>
+    <string name="menu_preferences_title">偏好設定</string>
+    <string name="menu_logout">登出</string>
+
+    <string name="context_menu_read_title">繼續閱讀</string>
+    <string name="context_menu_author_title">瀏覽作者資訊...</string>
+
+    
+    <string name="plurk_list_more_title">點此讀取更多</string>
+    <string name="plurk_list_loading_title">讀取中，請稍候...</string>
+    
+    <string name="dialog_logout_confirm_title">登出 Plurk</string>
+    <string name="dialog_logout_confirm_message">您確定要登出 Plurk 嗎?</string>
+    
+    <string name="dialog_switch_view_title">切換至...</string>
+    
+    <!-- Preferences -->
+    <string name="pref_cat_general">基本設定</string>
+    <string name="pref_refresh_title">Refresh</string>
+    <string name="pref_refresh_summary">Automatically update plurks</string>    
+    <string name="pref_refresh_interval_title">Refresh interval</string>
+    <string name="pref_refresh_interval_summary">How long will Pluroid update plurks</string>
+    <string name="pref_notification_title">Notification</string>
+    <string name="pref_notification_summary">Show notification on updates</string>
+    <string name="pref_notify_vibrate_title">Vibrate</string>
+    <string name="pref_notify_vibrate_summary">Vibrate on incoming notification</string>    
+    <string name="pref_notify_led_title">Phone LED</string>
+    <string name="pref_notify_led_summary">Flash LED on incoming notification</string>
+    
+    <string name="pref_cat_upload">Photo upload</string>
+    <string name="pref_upload_provider_title">Photo sharing host</string>
+    <string name="pref_upload_provider_summary">Select a host to upload photos</string>
+    <string name="pref_upload_resize_title">Resize photo</string>
+    <string name="pref_upload_resize_summary">Which size of photo will be uploaded</string>
+
+    <string name="pref_cat_misc">Misc.</string>
+    <string name="pref_use_external_title">Save cache on SD card</string>
+    <string name="pref_use_external_summary">Use SD card to cache the plurks</string>
+    
+    <!-- SharedPhoto -->
+    <string name="upload_photo_title">上傳圖片至 Plurk:</string>
+    <string name="upload_photo_text_hint">在此加入圖片敘述...</string>
+    <string name="upload_start_msg">上傳照片至 plurk 中，請稍候...</string>
+    
+    <string name="upload_photo_notify_start">上傳照片至 plurk 中，請稍候...</string>
+    <string name="upload_photo_notify_done">賀！上傳照片至 plurk 完成</string>
+    
+    <!-- SinglePlurk -->
+    <string name="single_responses_title"> 則回應</string>
+    <string name="respond">送出回應</string>
+    <string name="respoding">送出回應中，請稍候...</string>
+    
+    <!-- Compose -->
+    <string name="compose_emotion_dialog_title">插入表情符號:</string>
+</resources>

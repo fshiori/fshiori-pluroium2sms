@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="plurk_types">
+        <item>所有的 plurk</item>
+        <item>我的 plurk</item>
+        <item>私人的</item>
+        <item>回應過的</item>
+        <item>未讀的</item>
+    </string-array>
+    
+    <string-array name="qualifiers">
+        <item>說</item>
+        <item>:</item>
+        <item>愛</item>
+        <item>喜歡</item>
+        <item>分享</item>
+        <item>給</item>
+        <item>討厭</item>
+        <item>想要</item>
+        <item>期待</item>
+        <item>需要</item>
+        <item>打算</item>
+        <item>希望</item>
+        <item>問</item>
+        <item>已經</item>
+        <item>曾經</item>
+        <item>好奇</item>
+        <item>覺得</item>
+        <item>想</item>
+        <item>正在</item>
+    </string-array>
+    
+    <string-array name="update_interval_entries">
+        <item>30 分鐘</item>
+        <item>1 小時</item>
+        <item>2 小時</item>
+    </string-array>
+    
+    <string-array name="update_interval_entry_values">
+        <item>1800</item>
+        <item>3600</item>
+        <item>7200</item>
+    </string-array>
+    
+    
+    <string-array name="emotion_icons">
+        <item>ff124032f8cc3a9d43b99e661f8fcb4d</item>
+        <item>99ef3957ef779718546752b749bdeabd</item>
+        <item>3385896779bf1c13188bf92ca516878e</item>
+        <item>615f18f7ea8abc608c4c20eaa667883b</item>
+        <item>2d5e21929e752498e36d74096b1965e1</item>
+        <item>13b15aa49358be8f47b58552401d7725</item> <!-- (woot) -->
+        <item>57c69f50e40a283dcd2e7b56fc191abe</item>
+        <item>8eb05ca7a32301ba16c9496bcad893c4</item>
+        <item>261c0fe4a88417146ae0292d697a5f52</item>
+        <item>11eed61b41a3e935773476ac33bc00d9</item>
+        <item>72ddf2c585fe77dd0be731b19624d8cb</item>
+        <item>2884b8d0e496c06136c86e9c9599edae</item> <!-- :-& -->
+        <item>9454d15bcaf411b159dcc147ebc3f0eb</item>
+        <item>a5ae31c4185bc60cd006650dc10f8147</item>
+        <item>35b16fc25623670e41c2be6bf8ac38c7</item>
+        <item>4afd784c0df9f7a3ceacb92beca543f6</item>
+        <item>c1c9870cf653fa3cd103d2eb0f519ccb</item>
+        <item>d1a6f08507b126ec6a215e6a2372e8bb</item> <!-- (cozy) -->
+        <item>5495d64ccb898ca596b061168fa0374a</item>
+        <item>b82e3225c92a764d225429a6487d9f04</item>
+        <item>65271ac2126706bc09d31ff67c525d67</item>
+        <item>a709dab8ddd26bd222466d31bd549579</item>
+        <item>e3baa9d0d78c35e955a6b07c39f530fa</item>
+        <item>0f96595ed7733393b93a3d67aa4f2f4f</item> <!-- (hungry) -->
+        <item>919b87048fdf7bd59dae457f4284b20b</item>
+        <item>96872d481bbfe87aad5aed976c7de4ee</item>
+        <item>56336bb821c4766001816639e55e5811</item>
+        <item>6cb1dc388b9259565efedef8f336d27d</item>
+        <item>a9560787e93f4f8890e4bd38696ba537</item>
+        <item>a55bdb344892676b0fea545354654a49</item>
+        <item>9939dd585cf0e8d39e7912a98a9ce727</item> <!-- (blush) -->
+        <item>8073c1716e75d32eb79f97a9f521fa01</item>
+        <item>373cd2f23dab7528d4875170d13d64f7</item>
+        <item>8863234ebea13f109c9b15ba19a4531c</item>
+        <item>8738c7a1c402f41b5319abe504ce9687</item>
+        <item>db4c4a7d141fdcaca4d4b11f8fb360db</item>
+        <item>ced6d40bebe2d424b59322b311fc04bb</item>
+        <item>b62d1e55e8311af5bc7526c595ac1dbb</item> <!-- (panic) -->
+        <item>9b6f4864c822e1a97c98507c2b41a74f</item>
+        <item>e49c8ae965452550c98fc7f99741ae0d</item>
+        <item>318416eab5a856bddb1e106a21ff557a</item>
+        <item>e8ed6c7eed76d2acd9dbf469f29fbec2</item>
+        <item>2b3593aea68efa7a00b4ef2850f98b8a</item>
+        <item>ed3620ff28a02e3dc9ac4ffa8e6ae2e6</item> <!-- (drinking) -->
+        <item>08a43d50691a1ed22706fc92f568fa07</item>
+        <item>8600839dc03e6275b53fd03a0eba09cf</item>
+        <item>e6bb16b6ef386c5f23900b103dbdba31</item>
+        <item>1c890273544559b17f090d09238fa763</item>
+        <item>f053074bcce500fbd1e2327d49748a6d</item>
+        <item>1f44d3984a094fceae1f1a016a730fc9</item>
+        <item>2f7c90ce56fb4a70e34c04d8d7692dd0</item> <!-- (sleeping) -->
+        <item>900f3dd0adaad9142d567caf6bfb1311</item>
+        <item>95ace5ba1097301b5206a9e0fb431624</item>
+        <item>95e69aa508d4bb435706b9db0a610dad</item>
+        <item>a08ed27ec14b48d4703f53f7eb94834b</item>
+        <item>85ef5fa01a6a67a525429f8bf4279fe7</item>
+        <item>986ecf2b1ae69072e0195b0a58545900</item>
+        <item>150e3f367a063d3baf9720719d78d778</item> <!-- (heart) -->
+        <item>3fabe74e992888be701de2a9d80c180a</item>
+        <item>92b595a573d25dd5e39a57b5d56d4d03</item>
+        <item>4f01bac8a707e5450307f97065ec0fa7</item>
+        <item>48515125401120316abb97666458d05b</item>
+        <item>aabbc82c2b0dc72bfbce2f82c97a95e8</item>
+        <item>b0b0596acce9ffc1f2a27548aa642eaf</item>
+        <item>52991d7ff65a05526454bd1170a0f14c</item> <!-- (heart_beat) -->
+        <item>846277f0a154dc95a08594b7d32a5ccd</item>
+        <item>843739a95294fd0bf4c958840b46408f</item>
+        <item>22416dced8b59446db8cd366cc925d09</item>
+        <item>e3f0f67ca3af62e34f13abf1d036a010</item>
+        <item>84f94a47fcaf1df0a5f17a1cfa52fa64</item>
+        <item>44117848701cd748460921cfea5c3781</item> <!-- (taser) -->
+    </string-array>
+    
+    <string-array name="emotion_text">
+        <item>:-))</item>
+        <item>:)</item>
+        <item>:-D</item>
+        <item>(LOL)</item>
+        <item>:-P</item>
+        <item>(woot)</item>
+        <item>;-)</item>
+        <item>:-o</item>
+        <item>X-(</item>
+        <item>:-(</item>
+        <item>:\'-(</item>
+        <item>:-&amp;</item>
+        <item>(K)</item>
+        <item>(angry)</item>
+        <item>(annoyed)</item>
+        <item>(wave)</item>
+        <item>B-)</item>
+        <item>(cozy)</item>
+        <item>(sick)</item>
+        <item>(:</item>
+        <item>(goodluck)</item>
+        <item>(griltongue)</item>
+        <item>(mmm)</item>
+        <item>(hungry)</item>
+        <item>(music)</item>
+        <item>(tears)</item>
+        <item>(tongue)</item>
+        <item>(unsure)</item>
+        <item>(highfive)</item>
+        <item>(dance)</item>
+        <item>(blush)</item>
+        <item>(bigeyes)</item>
+        <item>(funkydance)</item>
+        <item>(idiot)</item>
+        <item>(lonely)</item>
+        <item>(scenic)</item>
+        <item>(hassle)</item>
+        <item>(panic)</item>
+        <item>(okok)</item>
+        <item>(yahoo)</item>
+        <item>(cry)</item>
+        <item>(doh)</item>
+        <item>(brokenheart)</item>
+        <item>(drinking)</item>
+        <item>(girlkiss)</item>
+        <item>(rofl)</item>
+        <item>(money)</item>
+        <item>(rock)</item>
+        <item>(nottalking)</item>
+        <item>(party)</item>
+        <item>(sleeping)</item>
+        <item>(thinking)</item>
+        <item>(bringit)</item>
+        <item>(worship)</item>
+        <item>(applause)</item>
+        <item>8-)</item>
+        <item>(gym)</item>
+        <item>(heart)</item>
+        <item>(devil)</item>
+        <item>(lmao)</item>
+        <item>(banana_cool)</item>
+        <item>(banana_rock)</item>
+        <item>(evil_grin)</item>
+        <item>(headspin)</item>
+        <item>(heart_beat)</item>
+        <item>(ninja)</item>
+        <item>(haha)</item>
+        <item>(evilsmirk)</item>
+        <item>(eyeroll)</item>
+        <item>(muhaha)</item>
+        <item>(taser)</item>
+    </string-array>
+    
+</resources>

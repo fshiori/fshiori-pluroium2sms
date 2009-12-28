@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="org.ericsk.pluroid"
+      android:versionCode="43"
+      android:versionName="1.9.5">
+      
+    <application android:icon="@drawable/pluroid" 
+        android:label="@string/app_name"
+        android:name="PluroidApplication">
+    
+        <activity android:name=".LaunchActivity"
+            android:theme="@style/PlurkStyle"
+            android:configChanges="keyboardHidden|orientation">
+            <intent-filter> 
+                <action android:name="android.intent.action.MAIN" /> 
+                <category android:name="android.intent.category.DEFAULT" /> 
+                <category android:name="android.intent.category.LAUNCHER" /> 
+            </intent-filter>
+        </activity>
+    
+        <activity android:name=".PlurkActivity" 
+            android:label="@string/app_name"
+            android:theme="@style/PlurkStyle"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="keyboardHidden|orientation">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"></action>
+                <action android:name="android.intent.action.PICK"></action>
+                <category android:name="android.intent.category.DEFAULT"></category>
+                <data android:mimeType="vnd.android.cursor.dir/vnd.ericsk.pluroid.plurk"></data>
+            </intent-filter>
+        </activity>
+        
+        <activity android:name=".ComposeActivity" android:windowSoftInputMode="adjustResize"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/PlurkStyle"></activity>
+        
+        <activity android:name=".SinglePlurkActivity" android:windowSoftInputMode="adjustResize"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/PlurkStyle"></activity>
+            
+        <activity android:name=".SharePhotoActivity" android:windowSoftInputMode="adjustResize"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/PlurkStyle"
+            android:launchMode="singleTask">
+            <intent-filter>
+               <action android:name="android.intent.action.SEND" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:mimeType="image/*" />
+           </intent-filter>
+        </activity>
+        
+        <activity android:name=".SettingsActivity" android:theme="@style/PlurkStyle" />
+        
+                    
+        <service android:process=":remote" android:name=".UploadService">
+            <intent-filter>
+                <action android:name="org.ericsk.pluroid.IUploadService" />
+                <action android:name="org.ericsk.pluroid.UPLOAD_SERVICE" />
+            </intent-filter>
+        </service>
+        
+    </application>
+
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <supports-screens 
+        android:largeScreens="true" 
+        android:normalScreens="true" 
+        android:smallScreens="true"
+        android:anyDensity="false"/>
+</manifest> 

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <!-- 
+    <PreferenceCategory android:title="@string/pref_cat_general">
+        <CheckBoxPreference android:key="pref_refresh" 
+            android:title="@string/pref_refresh_title" 
+            android:summary="@string/pref_refresh_summary" />
+    
+        <ListPreference android:key="pref_refresh_interval"
+            android:layout="?android:attr/preferenceLayoutChild"
+            android:title="@string/pref_refresh_interval_title"
+            android:summary="@string/pref_refresh_interval_summary"
+            android:entries="@array/update_interval_entries"
+            android:entryValues="@array/update_interval_entry_values"
+            android:dialogTitle="@string/pref_refresh_interval_title"
+            android:dependency="pref_refresh"
+            android:defaultValue="3600" />
+            
+        <CheckBoxPreference android:key="pref_notification" 
+            android:title="@string/pref_notification_title"
+            android:summary="@string/pref_notification_summary" />
+
+            <CheckBoxPreference android:key="pref_notify_vibrate"
+                android:layout="?android:attr/preferenceLayoutChild"
+                android:title="@string/pref_notify_vibrate_title"
+                android:summary="@string/pref_notify_vibrate_summary"
+                android:dependency="pref_notification" />
+            
+            <CheckBoxPreference android:key="pref_notify_led"
+                android:layout="?android:attr/preferenceLayoutChild"
+                android:title="@string/pref_notify_led_title"
+                android:summary="@string/pref_notify_led_summary"
+                android:dependency="pref_notification" />
+            
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="@string/pref_cat_upload">
+    
+        <ListPreference android:key="pref_upload_resize"
+            android:title="@string/pref_upload_resize_title"
+            android:summary="@string/pref_upload_resize_summary" />
+    
+    </PreferenceCategory>
+    -->
+    
+    <PreferenceCategory android:title="@string/pref_cat_misc">
+        
+        <CheckBoxPreference android:key="pref_load_avatar"
+            android:title="@string/pref_load_avatar_title"
+            android:defaultValue="true" />
+        
+        <!--
+        <CheckBoxPreference android:key="pref_use_external"
+            android:title="@string/pref_use_external_title"
+            android:summary="@string/pref_use_external_summary" />
+        -->
+    </PreferenceCategory>
+</PreferenceScreen>

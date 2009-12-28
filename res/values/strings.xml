@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, PlurkActivity!</string>
+    <string name="app_name">Pluroid</string>
+    
+    <string name="plurk">Plurk</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="upload">Upload</string>
+    
+    <!-- headers -->
+    <string name="header_login">Pluroid - Login</string>
+    <string name="header_all">Pluroid - All plurks</string>
+    <string name="header_compose">Pluroid - Compose a plurk</string>
+    <string name="header_sharephoto">Pluroid - Share a photo</string>
+    
+    <!-- LaunchActivity -->
+    <string name="login_name_title">Username or Email:</string>
+    <string name="login_password_title">Password:</string>
+    <string name="login_remember_title">Remember</string>
+    <string name="login_button_text">Login</string>
+    <string name="loging_button_text">Logging in...</string>
+    <string name="not_member_text">Don\'t have a plurk account?</string>
+    <string name="signup_button_text">Sign up</string>
+    <string name="login_fail_dialog_title">Login failed</string>
+    <string name="login_fail_message">Please check if the username/password you inputed are correct.</string>
+    
+    <!-- PlurkActivity -->
+    <string name="plurk_button_text">Plurk</string>
+    <string name="plurk_text_hint">What are you doing?</string>
+    <string name="plurk_qualifier_label">Select a qualifier</string>
+    <string name="plurking">Plurking...</string>
+    
+    <string name="menu_refresh_title">Refresh</string>
+    <string name="menu_compose_title">Compose</string>
+    <string name="menu_view">View...</string>
+    <string name="menu_upload_photo_title">Upload photo</string>
+    <string name="menu_preferences_title">Settings</string>
+    <string name="menu_logout">Log out</string>
+    
+    <string name="context_menu_read_title">Read plurk</string>
+    <string name="context_menu_author_title">View author info...</string>
+    
+    <string name="plurk_list_more_title">Click to load more</string>
+    <string name="plurk_list_loading_title">Loading plurks...</string>
+    
+    <string name="dialog_logout_confirm_title">Log out Plurk</string>
+    <string name="dialog_logout_confirm_message">Are you sure to log out plurk?</string>
+    
+    <string name="dialog_switch_view_title">Switch to...</string>
+    
+    <!-- Preferences -->
+    <string name="pref_cat_general">General</string>
+    <string name="pref_load_avatar_title">Load Avatar</string>
+    <string name="pref_time_zone_title">Time Zone</string>
+    <string name="pref_time_zone_summary">Select your preference timezone</string>
+    <string name="pref_refresh_title">Refresh</string>
+    <string name="pref_refresh_summary">Automatically update plurks</string>    
+    <string name="pref_refresh_interval_title">Refresh interval</string>
+    <string name="pref_refresh_interval_summary">How long will Pluroid update plurks</string>
+    <string name="pref_notification_title">Notification</string>
+    <string name="pref_notification_summary">Show notification on updates</string>
+    <string name="pref_notify_vibrate_title">Vibrate</string>
+    <string name="pref_notify_vibrate_summary">Vibrate on incoming notification</string>    
+    <string name="pref_notify_led_title">Phone LED</string>
+    <string name="pref_notify_led_summary">Flash LED on incoming notification</string>
+    
+    <string name="pref_cat_upload">Photo upload</string>
+    <string name="pref_upload_provider_title">Photo sharing host</string>
+    <string name="pref_upload_provider_summary">Select a host to upload photos</string>
+    <string name="pref_upload_resize_title">Resize photo</string>
+    <string name="pref_upload_resize_summary">Which size of photo will be uploaded</string>
+
+    <string name="pref_cat_misc">Misc.</string>
+    <string name="pref_use_external_title">Save cache on SD card</string>
+    <string name="pref_use_external_summary">Use SD card to cache the plurks</string>
+    
+    <!-- SharedPhoto -->
+    <string name="upload_photo_title">Upload to Plurk:</string>
+    <string name="upload_photo_text_hint">Add description...</string>
+    <string name="upload_start_msg">Starting to upload the photo...</string>
+    
+    <string name="upload_photo_notify_start">Uploading photo, please wait...</string>
+    <string name="upload_photo_notify_done">Uploading photo done.</string>
+    
+    <!-- SinglePlurk -->
+    <string name="single_responses_title"> responses</string>
+    <string name="respond">Respond</string>
+    <string name="respoding">Responding...</string>
+    
+    <!-- Compose -->
+    <string name="compose_emotion_dialog_title">Insert a emotion:</string>
+    
+    <!-- User -->
+    <string name="profile_gender">Gender:</string>
+    <string name="profile_male">Male</string>
+    <string name="profile_female">Female</string>
+    <string name="profile_location">From:</string>
+</resources>

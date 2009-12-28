@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <ImageView android:id="@+id/plurk_item_avatar"
+        android:src="@drawable/avatar_unknown"
+        android:layout_height="48dip"
+        android:layout_width="48dip"
+        android:gravity="center"
+        android:layout_margin="5dip"
+        android:layout_alignParentLeft="true" />
+        
+    <ImageView android:id="@+id/plurk_item_lock"
+        android:src="@drawable/lock"
+        android:layout_width="16dip"
+        android:layout_height="16dip"
+        android:layout_marginTop="5dip"
+        android:visibility="invisible"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/plurk_item_avatar" />
+    
+    <TextView android:id="@+id/plurk_item_owner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dip"
+        android:layout_marginRight="5dip"
+        android:text="You"
+        android:textStyle="bold"
+        android:textColor="#000"
+        android:textSize="16dip"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/plurk_item_avatar" />
+        
+    <TextView android:id="@+id/plurk_item_qualifier" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="says"
+        android:layout_marginTop="5dip"
+        android:paddingRight="5dip"
+        android:paddingLeft="5dip"
+        android:textColor="#fff" 
+        android:textSize="14dip"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/plurk_item_owner" />
+    
+    <TextView android:id="@+id/plurk_item_responses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dip"
+        android:layout_marginRight="6dip"
+        android:padding="2dip" 
+        android:textColor="#fff"
+        android:text="123"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:textSize="12dip" />
+    
+    <ImageView android:id="@+id/plurk_item_menu"
+        android:layout_width="16dip"
+        android:layout_height="16dip"
+        android:src="@drawable/list_arrow_blue"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center_vertical"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="6dip"
+        android:layout_marginLeft="6dip" />
+    
+    <TextView android:id="@+id/plurk_item_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dip"
+        android:textColor="#333"
+        android:textColorLink="#03c"
+        android:layout_below="@id/plurk_item_owner"
+        android:layout_toLeftOf="@id/plurk_item_menu"
+        android:layout_toRightOf="@id/plurk_item_avatar" />
+    
+    <TextView android:id="@+id/plurk_item_posted"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right" 
+        android:textColor="#888"
+        android:paddingRight="8dip"
+        android:textSize="12dip"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/plurk_item_content"
+        android:layout_toLeftOf="@id/plurk_item_menu" />
+    
+</RelativeLayout>
