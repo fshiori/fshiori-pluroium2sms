@@ -1,12 +1,13 @@
-package org.ericsk.pluroid;
+package org.pluroid.pluroium;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Vector;
 
-import org.ericsk.pluroid.data.PlurkListItem;
+import org.pluroid.pluroium.data.PlurkListItem;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -14,13 +15,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
-public class PlurkResponseAdapter extends BaseAdapter {
+public class PlurkListAdapter extends BaseAdapter {
 
-	private static final String TAG = "PlurkResponseAdapter";
+	private static final String TAG = "PlurkListAdapter";
 	private LayoutInflater inflater;
-	private ArrayList<PlurkListItem> responses;
+	private Vector<PlurkListItem> plurks;
 	
 	private static HashMap<String, Integer> qualifierColorMap;
 
@@ -47,49 +50,61 @@ public class PlurkResponseAdapter extends BaseAdapter {
     }
 	
 	private static class ViewHolder {
+        ImageView avatar;
+        ImageView lock;
         TextView nickname;
         TextView qualifier;
         TextView content;
+        TextView responses;
         TextView posted;
     }
 	
-	
-	public PlurkResponseAdapter(Context context) {
-		inflater = LayoutInflater.from(context);
-		responses = new ArrayList<PlurkListItem>();
-		notifyDataSetChanged();
+	public PlurkListAdapter(Context context) {
+		inflater = LayoutInflater.from(context);	
+		plurks = new Vector<PlurkListItem>();		
 	}
 	
 	public int getCount() {
-		return responses.size();
+		return plurks.size();
 	}
 
-	public Object getItem(int index) {
-		return responses.get(index);
+	public PlurkListItem getItem(int index) {
+		return plurks.get(index);
 	}
 
 	public long getItemId(int item) {
-		return responses.get(item).getPlurkId();
+		return plurks.get(item).getPlurkId();
 	}
 
 	public View getView(int index, View convertView, ViewGroup parent) {
+		final int ind = index;
 		ViewHolder holder;
-
+		
 		Log.v(TAG, "getView");
+		
 		if (convertView == null) {
-			convertView = inflater.inflate(R.layout.plurk_response_item, null);
+			convertView = inflater.inflate(R.layout.plurk_list_item, null);
 			holder = new ViewHolder();
 			
-			holder.nickname = (TextView) convertView.findViewById(R.id.plurk_response_owner);
-			holder.qualifier = (TextView) convertView.findViewById(R.id.plurk_response_qualifier);
-			holder.content = (TextView) convertView.findViewById(R.id.plurk_response_content);
-			holder.posted = (TextView) convertView.findViewById(R.id.plurk_response_posted);
+			holder.avatar = (ImageView) convertView.findViewById(R.id.plurk_item_avatar);
+			holder.lock = (ImageView) convertView.findViewById(R.id.plurk_item_lock);
+			holder.nickname = (TextView) convertView.findViewById(R.id.plurk_item_owner);
+			holder.qualifier = (TextView) convertView.findViewById(R.id.plurk_item_qualifier);
+			holder.content = (TextView) convertView.findViewById(R.id.plurk_item_content);
+			holder.posted = (TextView) convertView.findViewById(R.id.plurk_item_posted);
+			holder.responses = (TextView) convertView.findViewById(R.id.plurk_item_responses);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-		final PlurkListItem item = responses.get(index);
+		final PlurkListItem item = plurks.get(index);
 		
+		Bitmap avatar = item.getAvatar();
+		if (avatar != null) {
+			holder.avatar.setImageBitmap(avatar);
+		} else {
+			holder.avatar.setImageResource(R.drawable.avatar_unknown);
+		}
 		holder.nickname.setText(item.getNickname());
         holder.qualifier.setText(item.getQualifierTranslated());
         String qualifier = item.getQualifier();
@@ -104,25 +119,48 @@ public class PlurkResponseAdapter extends BaseAdapter {
         }
         holder.content.setText(item.getContent(), TextView.BufferType.SPANNABLE);
         holder.content.setMovementMethod(LinkMovementMethod.getInstance());
+        holder.responses.setText(String.valueOf(item.getResponses()));
         
+        if (item.getHasSeen() == 0) {
+            holder.responses.setTextColor(Color.WHITE);
+            holder.responses.setBackgroundColor(Color.rgb(0xfb, 0x00, 0x47));
+        } else {
+            holder.responses.setTextColor(Color.GRAY);
+            holder.responses.setBackgroundColor(Color.TRANSPARENT);
+        }
+        
+        final ListView parentList = (ListView) parent;
+        convertView.setClickable(true);
+        convertView.setFocusable(true);
+        convertView.setBackgroundResource(R.drawable.menuitem_background);
+        convertView.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                parentList.performItemClick(parentList, ind, item.getPlurkId());
+            	//view.performLongClick();
+            }
+        });
         
         holder.posted.setText(item.getPosted());
+        String limit = item.getLimitTo();
+        holder.lock.setVisibility(limit.length() > 0 ? View.VISIBLE : View.INVISIBLE);
 
         return convertView;
 	}
-
-	public void setResponses(List<PlurkListItem> responses) {
-		this.responses = (ArrayList<PlurkListItem>) responses;
+	
+	public void addPlurks(List<PlurkListItem> plurks) {
+		this.plurks.addAll(plurks);
 		notifyDataSetChanged();
 	}
 	
-	public void addResponses(List<PlurkListItem> responses) {
-		this.responses.addAll(responses);
-		notifyDataSetInvalidated();
+	public void setAvatar(Bitmap avatar, int index) {
+		PlurkListItem item = plurks.get(index);
+		item.setAvatar(avatar);
+		notifyDataSetChanged();
 	}
 	
 	public void clear() {
-		this.responses.clear();
+		this.plurks.clear();
 		notifyDataSetChanged();
 	}
+	
 }

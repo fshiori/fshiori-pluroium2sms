@@ -1,4 +1,4 @@
-package org.ericsk.pluroid;
+package org.pluroid.pluroium;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -29,10 +29,10 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.ericsk.pluroid.data.PlurkListItem;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pluroid.pluroium.data.PlurkListItem;
 
 import android.content.Context;
 import android.content.SharedPreferences;

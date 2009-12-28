@@ -1,4 +1,4 @@
-package org.ericsk.pluroid;
+package org.pluroid.pluroium;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -6,7 +6,7 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 
-import org.ericsk.pluroid.data.PlurkListItem;
+import org.pluroid.pluroium.data.PlurkListItem;
 
 import android.app.Activity;
 import android.app.Dialog;

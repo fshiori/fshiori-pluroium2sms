@@ -1,4 +1,4 @@
-package org.ericsk.pluroid.data;
+package org.pluroid.pluroium.data;
 
 import android.graphics.Bitmap;
 import android.text.SpannableStringBuilder;

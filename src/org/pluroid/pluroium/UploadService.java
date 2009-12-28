@@ -1,4 +1,7 @@
-package org.ericsk.pluroid;
+package org.pluroid.pluroium;
+
+import org.ericsk.pluroid.IUploadService;
+import org.ericsk.pluroid.IUploadServiceCallback;
 
 import android.app.Notification;
 import android.app.NotificationManager;

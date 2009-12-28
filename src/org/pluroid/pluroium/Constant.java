@@ -1,4 +1,4 @@
-package org.ericsk.pluroid;
+package org.pluroid.pluroium;
 
 public class Constant {
 

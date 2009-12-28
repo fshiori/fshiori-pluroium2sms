@@ -1,4 +1,4 @@
-package org.ericsk.pluroid;
+package org.pluroid.pluroium;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.ericsk.pluroid.data.PlurkListItem;
+import org.pluroid.pluroium.data.PlurkListItem;
 
 import android.app.Activity;
 import android.app.AlertDialog;

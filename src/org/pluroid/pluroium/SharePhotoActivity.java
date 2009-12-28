@@ -1,4 +1,4 @@
-package org.ericsk.pluroid;
+package org.pluroid.pluroium;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -32,7 +32,7 @@ public class SharePhotoActivity extends Activity
 			// Login first
 			Intent loginIntent = new Intent(this, LaunchActivity.class);
 			Bundle extras = new Bundle();
-			extras.putString("back_activity", "org.ericsk.pluroid.SharePhotoActivity");
+			extras.putString("back_activity", "org.pluroid.pluroium.SharePhotoActivity");
 			extras.putParcelable(Intent.EXTRA_STREAM, photoUri);
 			loginIntent.putExtras(extras);
 			startActivity(loginIntent);
@@ -62,7 +62,7 @@ public class SharePhotoActivity extends Activity
 
 	public void onClick(View v) {
 		if (v == uploadButton) {
-			Intent uploadIntent = new Intent("org.ericsk.pluroid.UPLOAD_SERVICE");
+			Intent uploadIntent = new Intent("org.pluroid.pluroium.UPLOAD_SERVICE");
 			Bundle data = new Bundle();
 			data.putParcelable("photo_uri", photoUri);
 			data.putString("photo_text", photoText.getText().toString());

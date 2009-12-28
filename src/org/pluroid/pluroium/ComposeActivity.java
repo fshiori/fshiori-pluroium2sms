@@ -1,4 +1,4 @@
-package org.ericsk.pluroid;
+package org.pluroid.pluroium;
 
 import java.io.IOException;
 import java.util.ArrayList;
