@@ -235,8 +235,14 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 					refreshItem.setEnabled(true);
 				}
 				progressBar.setVisibility(View.INVISIBLE);
-				responseTitle.setText(responses.size() + " " + getResources().getString(R.string.single_responses_title));
-				responseAdapter.addResponses(responses);
+				
+				//Fishuman:
+				//   responses could be null if there is exception in plurkHelper.getResponses(plurkId);
+				//   This is a temp solution
+				if(responses != null) {
+					responseTitle.setText(responses.size() + " " + getResources().getString(R.string.single_responses_title));
+					responseAdapter.addResponses(responses);
+				}
 				break;
 			case MSG_RESPOND_DONE:
 				completeInput();
