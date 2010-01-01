@@ -26,7 +26,6 @@
                 <action android:name="android.intent.action.VIEW"></action>
                 <action android:name="android.intent.action.PICK"></action>
                 <category android:name="android.intent.category.DEFAULT"></category>
-                <data android:mimeType="vnd.android.cursor.dir/vnd.ericsk.pluroid.plurk"></data>
             </intent-filter>
         </activity>
         
@@ -54,8 +53,8 @@
                     
         <service android:process=":remote" android:name=".UploadService">
             <intent-filter>
-                <action android:name="org.ericsk.pluroid.IUploadService" />
-                <action android:name="org.ericsk.pluroid.UPLOAD_SERVICE" />
+                <action android:name="org.pluroid.pluroium.IUploadService" />
+                <action android:name="org.pluroid.pluroium.UPLOAD_SERVICE" />
             </intent-filter>
         </service>
         
