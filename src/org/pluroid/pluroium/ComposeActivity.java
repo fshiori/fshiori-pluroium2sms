@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -53,6 +54,10 @@ public class ComposeActivity extends Activity implements View.OnClickListener {
 		plurkHelper = new PlurkHelper(this);
 		
 		initView();
+		
+		Intent intent;
+		if((intent=getIntent()) != null)
+			handleIntent(intent);
 	}
 	
 	@Override
@@ -161,6 +166,16 @@ public class ComposeActivity extends Activity implements View.OnClickListener {
 			finish();
 		}
 	}
+
+	protected void handleIntent(Intent intent) {
+		if(Intent.ACTION_SEND.equals(intent.getAction())) {
+			plurkQualifier.setSelection(4); //"share"
+			plurkContent.append(intent.getStringExtra(intent.EXTRA_TEXT));
+			plurkContent.append(" (");
+			plurkContent.append(intent.getStringExtra(intent.EXTRA_SUBJECT));
+			plurkContent.append(")");
+		}
+	}
 	
 	private Handler msgHandler = new Handler() {
 		
@@ -177,4 +192,5 @@ public class ComposeActivity extends Activity implements View.OnClickListener {
 			}
 		}
 	};
+
 }

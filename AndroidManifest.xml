@@ -31,7 +31,13 @@
         
         <activity android:name=".ComposeActivity" android:windowSoftInputMode="adjustResize"
             android:configChanges="keyboardHidden|orientation"
-            android:theme="@style/PlurkStyle"></activity>
+            android:theme="@style/PlurkStyle">
+            <intent-filter>
+               <action android:name="android.intent.action.SEND" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:mimeType="text/plain" />
+           </intent-filter>
+        </activity>
         
         <activity android:name=".SinglePlurkActivity" android:windowSoftInputMode="adjustResize"
             android:configChanges="keyboardHidden|orientation"
