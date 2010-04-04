@@ -367,6 +367,7 @@ public class PlurkActivity extends Activity
     	if (!plurkHelper.isLoginned()) {
     		startActivity(new Intent(this, LaunchActivity.class));
     		finish();
+    		return;
     	}
     	
     	new Thread() {
