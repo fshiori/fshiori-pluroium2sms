@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -42,6 +43,7 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 	
 	private SharedPreferences sharedPref;
 	private InputMethodManager ime;
+	private LoginTask loginTask;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,15 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 			launchMain();
 		}
 	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if (loginTask != null) {
+			loginTask.cancel(true);
+		}
+	}
+	
 	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -140,7 +151,7 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 	 */
 	private void launchMain() {
 		
-		Class<?> targetClass = PlurkActivity.class;
+		Class targetClass = PlurkActivity.class;
 		Intent intent = new Intent();
 				
 		if (extras != null) {
@@ -167,22 +178,14 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 	private void performLogin() {
 		toggleForm(false);
 		
+		// TODO: check username/password
 		String username = nameField.getText().toString();
 		String password = passwordField.getText().toString();		
 		plurkHelper.setAuth(username, password);
 		
 		// login plurk
-		new Thread() {
-			public void run() {
-				Message msg;
-				if (plurkHelper.login(rememberBox.isChecked())) {
-					msg = Message.obtain(msgHandler, MSG_LOGIN_SUCCESS);
-				} else {
-					msg = Message.obtain(msgHandler, MSG_LOGIN_FAILED);
-				}
-				msgHandler.sendMessage(msg);
-			}
-		}.start();
+		loginTask = new LoginTask();
+		loginTask.execute("");
 	}
 	
 	/**
@@ -193,11 +196,9 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case MSG_LOGIN_SUCCESS:
-				launchMain();
 				break;
 			case MSG_LOGIN_FAILED:
-				toggleForm(true);
-				showDialog(DIALOG_LOGIN_FAIL);
+
 				break;
 			}
 			super.handleMessage(msg);
@@ -212,5 +213,23 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 		loginButton.setEnabled(enabled);
 		loginButton.setText(enabled ? R.string.login_button_text : R.string.loging_button_text);
 		signupButton.setEnabled(enabled);
+	}
+	
+	private class LoginTask extends AsyncTask<String, Integer, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(String... arg0) {
+			return plurkHelper.login(rememberBox.isChecked());
+		}
+		
+		@Override
+        protected void onPostExecute(Boolean isOk) {
+			if (isOk) {
+				launchMain();
+			} else {
+				toggleForm(true);
+				showDialog(DIALOG_LOGIN_FAIL);				
+			}
+		}
 	}
 }

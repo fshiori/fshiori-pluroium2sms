@@ -17,13 +17,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +42,9 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 	private static final String TAG = "SinglePlurkActivity";
 
 	private String plurkId;
+	private String qualifier;
+	private String avatarIndex;
+	private TextView headerText;
 	private TextView responseTitle;
 	private ListView responsesView;
 	private PlurkResponseAdapter responseAdapter;
@@ -62,7 +65,6 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 	
 	private static final int MSG_LOAD_RESPONSES = 1;
 	private static final int MSG_LOAD_RESPONSES_DONE = 2;
-	private static final int MSG_RESPOND_DONE = 3;
 	
 	private static final int RESPONDING_DIALOG = 1;
 
@@ -99,6 +101,7 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 		plurkHelper = new PlurkHelper(this);
 		ime = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		initView();
+		ime.hideSoftInputFromWindow(responseText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 	}
 	
 	
@@ -142,7 +145,7 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 	
 	private void initView() {	
 		setContentView(R.layout.single_plurk);
-
+		
 		responsesView = (ListView) findViewById(R.id.plurk_responses);
 		View hdView = LayoutInflater.from(this).inflate(R.layout.single_plurk_header, null);
 		responsesView.addHeaderView(hdView);
@@ -192,8 +195,12 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 		postView.setText(plurkData.getString("posted"));
 		responseTitle = (TextView) hdView.findViewById(R.id.single_plurk_responses_title);
 
+		avatarIndex = plurkData.getString("avatar_index");
 		plurkId = plurkData.getString("plurk_id");
+		qualifier = plurkData.getString("qualifier");
 		
+		headerText = (TextView) findViewById(R.id.single_page_title);
+		headerText.setOnClickListener(this);
 		progressBar = (ProgressBar) findViewById(R.id.single_load_progressing);
 		
 		responseQualifier = (Spinner) findViewById(R.id.single_plurk_response_qualifier);
@@ -235,19 +242,10 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 					refreshItem.setEnabled(true);
 				}
 				progressBar.setVisibility(View.INVISIBLE);
-				
-				//Fishuman:
-				//   responses could be null if there is exception in plurkHelper.getResponses(plurkId);
-				//   This is a temp solution
-				if(responses != null) {
+				if (responses != null) {
 					responseTitle.setText(responses.size() + " " + getResources().getString(R.string.single_responses_title));
 					responseAdapter.addResponses(responses);
 				}
-				break;
-			case MSG_RESPOND_DONE:
-				completeInput();
-				progressDlg.cancel();
-				msgHandler.sendEmptyMessage(MSG_LOAD_RESPONSES);
 				break;
 			default:
 				super.handleMessage(msg);
@@ -256,7 +254,9 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 	};
 
 	public void onClick(View v) {
-		if (v == responseText) {
+		if (v == headerText) {
+			responsesView.setSelectionFromTop(0, 0);
+		} else if (v == responseText) {
 			if (bottomPanel.getVisibility() == View.GONE) {
 				bottomPanel.setVisibility(View.VISIBLE);
 			}
@@ -264,19 +264,9 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 			completeInput();
 		} else if (v == postButton) {
 			showDialog(RESPONDING_DIALOG);
-			new Thread() {
-				public void run() {
-					String resp = responseText.getText().toString();
-					Log.d(TAG, "Resp: " + resp);
-					plurkHelper.addResponse(plurkId, 
-							PluroiumApplication.qualifiers[responseQualifier.getSelectedItemPosition()], 
-							resp); 
-					msgHandler.sendEmptyMessage(MSG_RESPOND_DONE);
-				}
-			}.start();
+			new RespondingTask().execute("");
 		}
 	}
-	
 	
 	private void completeInput() {
 		bottomPanel.setVisibility(View.GONE);
@@ -284,6 +274,25 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 		
 		if (ime != null) {
 			ime.hideSoftInputFromWindow(bottomPanel.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+		}
+	}
+	
+	private class RespondingTask extends AsyncTask<String, Integer, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(String... arg0) {
+			String resp = responseText.getText().toString();
+			plurkHelper.addResponse(plurkId, 
+					PluroiumApplication.qualifiers[responseQualifier.getSelectedItemPosition()], 
+					resp); 
+			return true;
+		}
+		
+		@Override
+        protected void onPostExecute(Boolean isOk) {
+			completeInput();
+			progressDlg.cancel();
+			msgHandler.sendEmptyMessage(MSG_LOAD_RESPONSES);
 		}
 	}
 }

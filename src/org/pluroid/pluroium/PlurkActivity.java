@@ -23,17 +23,16 @@ import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -60,14 +59,8 @@ public class PlurkActivity extends Activity
 	private static final int MENU_UPLOAD_PHOTO 	= Menu.FIRST + 3;
 	private static final int MENU_SETTINGS 		= Menu.FIRST + 4;
 	private static final int MENU_LOGOUT 		= Menu.FIRST + 5;
-	
-	// Context Menu
-	private static final int CONTEXT_MENU_READ = 1;
-	
-	private static final int MSG_LOADING_SUCCESS	= 1;
-	private static final int MSG_LOADING_FAIL 		= 2;
+		
 	private static final int MSG_AVATAR_SETTING 	= 4;
-	private static final int MSG_AVATAR_LOADED 		= 5;
 	private static final int MSG_PLURK_DONE			= 6;
 	private static final int MSG_SWITCH_VIEW		= 7;
 	
@@ -102,12 +95,13 @@ public class PlurkActivity extends Activity
 	private MenuItem refreshItem;
 	private MenuItem switchViewItem;
 	
+	private LoadPlurksTask loadPlurksTask;
+	private LoadAvatarsTask loadAvatarsTask;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        Log.v(TAG, "onCreate");
-        
+                
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -120,6 +114,19 @@ public class PlurkActivity extends Activity
         initView();
     	loadPlurks();
 
+    }
+    
+    @Override
+    protected void onStop() {
+    	super.onStop();
+    	   	
+    	if (loadAvatarsTask != null) {
+    		loadAvatarsTask.cancel(true);
+    	}
+    	
+    	if (loadPlurksTask != null) {
+    		loadPlurksTask.cancel(true);
+    	}
     }
     
     @Override
@@ -262,57 +269,6 @@ public class PlurkActivity extends Activity
     	super.onSaveInstanceState(outState);
     }
     
-    
-    @Override
-	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfo) {
-    	super.onCreateContextMenu(menu, view, menuInfo);
-    	
-    	int ind = 0;
-    	
-    	menu.add(0, CONTEXT_MENU_READ, ind++, R.string.context_menu_read_title);    	
-    	
-    }
-    
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-    	super.onContextItemSelected(item);
-    	
-    	AdapterView.AdapterContextMenuInfo info;
-    	try {
-    		info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-    	} catch (ClassCastException e) {
-    		Log.e(TAG, "Bad MenuInfo");
-    		return false;
-    	}
-    	
-    	PlurkListItem plurkItem = plurkListAdapter.getItem(info.position);
-    	
-    	Intent intent = new Intent();
-    	Bundle data;
-    	
-    	switch (item.getItemId()) {
-    	case CONTEXT_MENU_READ:
-    		intent.setClass(PlurkActivity.this, SinglePlurkActivity.class);
-    		
-    		data = new Bundle();
-    		data.putString("plurk_id", String.valueOf(plurkItem.getPlurkId()));
-    		data.putString("avatar_index", plurkItem.getAvatarIndex());
-    		data.putParcelable("avatar", plurkItem.getAvatar());
-    		data.putString("nickname", plurkItem.getNickname());
-    		data.putString("qualifier", plurkItem.getQualifier());
-    		data.putString("qualifier_translated", plurkItem.getQualifierTranslated());
-    		data.putCharSequence("content", plurkItem.getRawContent());
-    		data.putString("posted", plurkItem.getPosted());
-    		intent.putExtras(data);
-    		startActivity(intent);
-    		
-    		return true;
-    	}
-    	
-    	return false;
-    }
-    
-    
     private void clearTimeStamp() {
         Editor prefEdit = sharedPref.edit();
         prefEdit.putString(Constant.LAST_TIME, "").commit();
@@ -329,6 +285,7 @@ public class PlurkActivity extends Activity
         setContentView(R.layout.plurk);
 
         headerText = (TextView) findViewById(R.id.page_title);
+        headerText.setOnClickListener(this);
         
         LayoutInflater inflater = LayoutInflater.from(this);
         plurkListView = (ListView) findViewById(R.id.plurk_list_view);
@@ -370,50 +327,8 @@ public class PlurkActivity extends Activity
     		return;
     	}
     	
-    	new Thread() {
-    		@Override
-    		public void run() {
-    	        TimeZone tz = TimeZone.getDefault();
-    	        int offset = tz.getRawOffset();
-    	        Date nowDate;
-    	        String timeOffset;
-    			
-    			String timeStart = sharedPref.getString(Constant.LAST_TIME, "");
-    			if (timeStart.length() == 0) {
-	    			long now = Calendar.getInstance().getTime().getTime() + 30000;
-	    	        nowDate = new Date(now-offset);
-	    	        timeOffset = sdf.format(nowDate);
-    			} else {
-    				nowDate = new Date(Long.parseLong(timeStart)-offset);
-        			timeOffset = sdf2.format(nowDate);
-    			}
-    	        
-    	        newPlurks = plurkHelper.getPlurks(currentPlurksView, 25, timeOffset);
-    	        if (newPlurks != null) {
-    	        	int size = newPlurks.size();
-					if (size > 0) {
-						String utcPosted = newPlurks.get(size-1).getUtcPosted();				
-						Editor prefEdit = sharedPref.edit();
-						try {
-							prefEdit.putString(Constant.LAST_TIME, String.valueOf(sdf.parse(utcPosted).getTime()));
-							prefEdit.commit();
-						} catch (ParseException e) {
-							Log.e(TAG, "parse date error!");
-						}
-		
-						int index = avatarStartIndex;
-		    	        for (PlurkListItem item : newPlurks) {
-		    	        	avatarQueue.add(index + ";" + item.getUserId() + ";"+item.getAvatarIndex());
-		    	        	index++;
-		    	        }
-		    	        avatarStartIndex = index;
-					}
-	    	        msgHandler.sendMessage(Message.obtain(msgHandler, MSG_LOADING_SUCCESS));
-    	        } else {
-	    	        msgHandler.sendMessage(Message.obtain(msgHandler, MSG_LOADING_FAIL));
-    	        }
-    		}
-    	}.start();
+    	loadPlurksTask = new LoadPlurksTask();
+    	loadPlurksTask.execute("");
     }
     
     private void performLogout() {
@@ -436,29 +351,6 @@ public class PlurkActivity extends Activity
     		this.index = index;
     	}    	
     }
-    
-    private void startAvatarThread() {
-    	progressBar.setVisibility(View.VISIBLE);
-    	new Thread() {
-    		@Override
-    		public void run() {
-    			int qSize = avatarQueue.size();
-    			for (int i = 0; i < qSize; ++i) {
-    				String[] token = avatarQueue.get(i).split(";");
-    				String avatarIndex = "";
-    				if (token.length > 2) {
-    					avatarIndex = token[2];
-    				}
-    				
-    				Bitmap avatar = plurkHelper.getAvatar(Long.parseLong(token[1]), "medium", avatarIndex);
-    				msgHandler.sendMessage(Message.obtain(
-    						msgHandler, MSG_AVATAR_SETTING, new AvatarObj(avatar, Integer.parseInt(token[0]))));
-    			}
-				msgHandler.sendEmptyMessageDelayed(MSG_AVATAR_LOADED, 0);
-    			avatarQueue.clear();
-    		}
-    	}.start();
-    }
         
     /**
 	 * Message handler
@@ -467,53 +359,16 @@ public class PlurkActivity extends Activity
 		@Override
 		public void handleMessage(Message msg) {
 			
+			// check if the login is required
+	        if (!plurkHelper.isLoginned()) {
+	        	performLogout();
+	        	return;
+	        }
+			
 			switch (msg.what) {
-			case MSG_LOADING_SUCCESS:
-				progressBar.setVisibility(View.INVISIBLE);
-				plurkListAdapter.addPlurks(newPlurks);
-				listFooter.setText(R.string.plurk_list_more_title);
-				
-				boolean loadAvatar = sharedPref.getBoolean(Constant.PREF_LOAD_AVATAR, true);
-				if (loadAvatar) {
-					startAvatarThread();
-				} else {
-					loading = false;
-					progressBar.setVisibility(View.INVISIBLE);
-					if (refreshItem != null) {
-						refreshItem.setEnabled(true);
-			    		switchViewItem.setEnabled(true);
-					}
-					if (plurkButton != null) {
-						plurkButton.setEnabled(true);
-					}
-				}
-				break;
-			case MSG_LOADING_FAIL:
-				loading = false;
-				if (refreshItem != null) {
-					refreshItem.setEnabled(true);
-		    		switchViewItem.setEnabled(true);
-				}
-				if (plurkButton != null) {
-					plurkButton.setEnabled(true);
-				}
-				progressBar.setVisibility(View.INVISIBLE);
-				listFooter.setText(R.string.plurk_list_more_title);
-				break;
 			case MSG_AVATAR_SETTING:
 				AvatarObj obj = (AvatarObj) msg.obj;
 				plurkListAdapter.setAvatar(obj.avatar, obj.index);
-				break;
-			case MSG_AVATAR_LOADED:
-				loading = false;
-				progressBar.setVisibility(View.INVISIBLE);
-				if (refreshItem != null) {
-					refreshItem.setEnabled(true);
-		    		switchViewItem.setEnabled(true);
-				}
-				if (plurkButton != null) {
-					plurkButton.setEnabled(true);
-				}
 				break;
 			case MSG_PLURK_DONE:
 	    		clearTimeStamp();
@@ -523,7 +378,7 @@ public class PlurkActivity extends Activity
 	    		loadPlurks();
 				break;
 			case MSG_SWITCH_VIEW:
-				headerText.setText("Pluroium - " + getResources().getStringArray(R.array.plurk_types)[currentPlurksView]);
+				headerText.setText("Pluroid - " + getResources().getStringArray(R.array.plurk_types)[currentPlurksView]);
 	    		clearTimeStamp();
 				listFooter.setText(R.string.plurk_list_loading_title);
 				loadPlurks();
@@ -535,6 +390,11 @@ public class PlurkActivity extends Activity
 	};
 
 	public void onClick(View v) {
+		if (v == headerText) {
+			plurkListView.setSelectionFromTop(0, 0);
+			return;
+		}
+		
 		if (!loading) {
 			if (v == listFooter) {
 				listFooter.setText(R.string.plurk_list_loading_title);
@@ -545,12 +405,7 @@ public class PlurkActivity extends Activity
 				}
 				
 				showDialog(DIALOG_PLURKING);
-				new Thread(){
-					public void run() {
-						plurkHelper.addPlurk("says", plurkContent.getText().toString(), true);
-						msgHandler.sendEmptyMessage(MSG_PLURK_DONE);
-					}
-				}.start();
+				new PlurkTask().execute("");
 			} 
 		}	
 	}
@@ -570,5 +425,135 @@ public class PlurkActivity extends Activity
 		data.putString("posted", item.getPosted());
 		intent.putExtras(data);
 		startActivity(intent);
+	}
+	
+	private class LoadPlurksTask extends AsyncTask<String, Integer, Boolean> {
+		@Override
+		protected Boolean doInBackground(String... arg0) {
+	        TimeZone tz = TimeZone.getDefault();
+	        int offset = tz.getRawOffset();
+	        Date nowDate;
+	        String timeOffset;
+			
+			String timeStart = sharedPref.getString(Constant.LAST_TIME, "");
+			if (timeStart.length() == 0) {
+    			long now = Calendar.getInstance().getTime().getTime() + 30000;
+    	        nowDate = new Date(now-offset);
+    	        timeOffset = sdf.format(nowDate);
+			} else {
+				nowDate = new Date(Long.parseLong(timeStart)-offset);
+    			timeOffset = sdf2.format(nowDate);
+			}
+	        
+	        newPlurks = plurkHelper.getPlurks(currentPlurksView, 25, timeOffset);
+	        if (newPlurks != null) {
+	        	int size = newPlurks.size();
+				if (size > 0) {
+					String utcPosted = newPlurks.get(size-1).getUtcPosted();				
+					Editor prefEdit = sharedPref.edit();
+					try {
+						prefEdit.putString(Constant.LAST_TIME, String.valueOf(sdf.parse(utcPosted).getTime()));
+						prefEdit.commit();
+					} catch (ParseException e) {
+						Log.e(TAG, "parse date error!");
+					}
+	
+					int index = avatarStartIndex;
+	    	        for (PlurkListItem item : newPlurks) {
+	    	        	avatarQueue.add(index + ";" + item.getUserId() + ";"+item.getAvatarIndex());
+	    	        	index++;
+	    	        }
+	    	        avatarStartIndex = index;
+				}
+    	        return true;
+	        } else {
+	        	return false;
+	        }
+		}
+		
+		@Override
+        protected void onPostExecute(Boolean isOk) {
+			if (isOk) {
+				progressBar.setVisibility(View.INVISIBLE);
+				plurkListAdapter.addPlurks(newPlurks);
+				listFooter.setText(R.string.plurk_list_more_title);
+				
+				boolean loadAvatar = sharedPref.getBoolean(Constant.PREF_LOAD_AVATAR, true);
+				if (loadAvatar) {
+					progressBar.setVisibility(View.VISIBLE);
+					loadAvatarsTask = new LoadAvatarsTask();
+					loadAvatarsTask.execute("");
+				} else {
+					loading = false;
+					progressBar.setVisibility(View.INVISIBLE);
+					if (refreshItem != null) {
+						refreshItem.setEnabled(true);
+			    		switchViewItem.setEnabled(true);
+					}
+					if (plurkButton != null) {
+						plurkButton.setEnabled(true);
+					}
+				}				
+			} else {
+				loading = false;
+				if (refreshItem != null) {
+					refreshItem.setEnabled(true);
+		    		switchViewItem.setEnabled(true);
+				}
+				if (plurkButton != null) {
+					plurkButton.setEnabled(true);
+				}
+				progressBar.setVisibility(View.INVISIBLE);
+				listFooter.setText(R.string.plurk_list_more_title);
+			}
+		}
+		
+	}
+	
+	private class LoadAvatarsTask extends AsyncTask<String, Integer, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(String... arg0) {
+			int qSize = avatarQueue.size();
+			for (int i = 0; i < qSize; ++i) {
+				String[] token = avatarQueue.get(i).split(";");
+				String avatarIndex = "";
+				if (token.length > 2) {
+					avatarIndex = token[2];
+				}
+				
+				Bitmap avatar = plurkHelper.getAvatar(Long.parseLong(token[1]), "medium", avatarIndex);
+				msgHandler.sendMessage(Message.obtain(
+						msgHandler, MSG_AVATAR_SETTING, new AvatarObj(avatar, Integer.parseInt(token[0]))));
+			}
+
+			return true;
+		}
+		
+		@Override
+        protected void onPostExecute(Boolean isOk) {
+			loading = false;
+			progressBar.setVisibility(View.INVISIBLE);
+			if (refreshItem != null) {
+				refreshItem.setEnabled(true);
+	    		switchViewItem.setEnabled(true);
+			}
+			if (plurkButton != null) {
+				plurkButton.setEnabled(true);
+			}
+			avatarQueue.clear();
+		}
+	}
+	
+	private class PlurkTask extends AsyncTask<String, Integer, String> {
+
+		@Override
+		protected String doInBackground(String... arg0) {
+			plurkHelper.addPlurk("says", plurkContent.getText().toString(), true);
+			msgHandler.sendEmptyMessage(MSG_PLURK_DONE);
+			
+			return null;
+		}
+		
 	}
 }
