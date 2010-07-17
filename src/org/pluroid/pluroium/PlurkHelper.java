@@ -190,7 +190,7 @@ public class PlurkHelper {
 					prefEdit.commit();
 				}
 			} catch (Exception e) {
-				Log.e(TAG, "Login faield: " + e.getMessage());
+				Log.e(TAG, "Login failed: " + e.getMessage());
 			}
 		}
 		
