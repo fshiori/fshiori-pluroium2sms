@@ -445,7 +445,8 @@ public class PlurkActivity extends Activity
     			timeOffset = sdf2.format(nowDate);
 			}
 	        
-	        newPlurks = plurkHelper.getPlurks(currentPlurksView, 25, timeOffset);
+			// Don't try to query for more than 20. Otherwise plurk.com will return only private/personal plurks.
+	        newPlurks = plurkHelper.getPlurks(currentPlurksView, 20, timeOffset);
 	        if (newPlurks != null) {
 	        	int size = newPlurks.size();
 				if (size > 0) {
