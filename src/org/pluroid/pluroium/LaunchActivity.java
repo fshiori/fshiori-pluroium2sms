@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -61,11 +60,7 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 	@Override
 	public void onStart() {
 		super.onStart();
-		// Check auth
-		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-		String cookieStr = sharedPref.getString(Constant.PREF_COOKIE, "");
-		
-		if (cookieStr.length() == 0) {
+		if (!plurkHelper.isLoginned()) {
 			initView();
 			setVisible(true);
 		} else {

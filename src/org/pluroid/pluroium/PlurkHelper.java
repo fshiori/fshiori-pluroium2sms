@@ -158,6 +158,9 @@ public class PlurkHelper {
 		if (cookie == null || cookie.getExpiryDate().before(now)) {
 			logined = false;
 			cookieStore.clear();
+			Editor prefEditor = sharedPref.edit();
+			prefEditor.putString(Constant.PREF_COOKIE, "");
+			prefEditor.commit();
 
 			try {
 				List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -364,7 +367,6 @@ public class PlurkHelper {
                     ret.add(item);
                 }
             } 
-			
 		} catch (Exception e) {
 			Log.e(TAG, "Get plurks failed! Reason: " + e.getMessage());
 		}
