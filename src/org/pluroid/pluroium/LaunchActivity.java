@@ -54,7 +54,7 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 		plurkHelper = new PlurkHelper(this);
 		ime = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 		
-		
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 	}
 	
 	@Override
