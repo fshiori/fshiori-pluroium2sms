@@ -19,7 +19,7 @@
             android:fadingEdge="horizontal"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:text="Pluroium" />
+            android:text="Pluroid" />
             
         <ProgressBar android:id="@+id/single_load_progressing" 
             style="?android:attr/progressBarStyleSmall"
@@ -53,7 +53,9 @@
         
         <RelativeLayout 
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
             
             <Spinner android:id="@+id/single_plurk_response_qualifier"
                android:layout_alignParentLeft="true"
@@ -66,11 +68,13 @@
             
             <EditText android:id="@+id/single_plurk_response_text"
                 android:layout_alignParentRight="true"
-	            android:layout_width="0dip"
-	            android:layout_weight="1"
-	            android:layout_toRightOf="@id/single_plurk_response_qualifier"
-	            android:layout_height="wrap_content"
-	            android:hint="Click to comment..." />
+	              android:layout_width="0dip"
+	              android:layout_weight="1"
+	              android:layout_toRightOf="@id/single_plurk_response_qualifier"
+	              android:layout_height="wrap_content"
+	              android:hint="Click to comment..."
+	              android:nextFocusUp="@id/single_plurk_response_text"
+                android:nextFocusLeft="@id/single_plurk_response_text" />
         
         </RelativeLayout>
         

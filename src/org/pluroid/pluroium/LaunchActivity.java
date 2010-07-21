@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -116,7 +117,7 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
     	requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
 		
-		progressBar = (ProgressBar) findViewById(R.id.progressing);
+		progressBar = (ProgressBar) findViewById(R.id.load_progressing);
 		
 		loginButton = (Button) findViewById(R.id.login_button);
 		loginButton.setOnClickListener(this);
