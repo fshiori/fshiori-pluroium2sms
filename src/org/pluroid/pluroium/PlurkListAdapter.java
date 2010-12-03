@@ -9,8 +9,8 @@ import org.pluroid.pluroium.data.PlurkListItem;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +24,7 @@ public class PlurkListAdapter extends BaseAdapter {
 	private static final String TAG = "PlurkListAdapter";
 	private LayoutInflater inflater;
 	private Vector<PlurkListItem> plurks;
+	private Context context;
 	
 	private static HashMap<String, Integer> qualifierColorMap;
 
@@ -60,6 +61,7 @@ public class PlurkListAdapter extends BaseAdapter {
     }
 	
 	public PlurkListAdapter(Context context) {
+		this.context = context;
 		inflater = LayoutInflater.from(context);	
 		plurks = new Vector<PlurkListItem>();		
 	}
@@ -80,8 +82,6 @@ public class PlurkListAdapter extends BaseAdapter {
 		final int ind = index;
 		ViewHolder holder;
 		
-		Log.v(TAG, "getView");
-		
 		if (convertView == null) {
 			convertView = inflater.inflate(R.layout.plurk_list_item, null);
 			holder = new ViewHolder();
@@ -98,13 +98,10 @@ public class PlurkListAdapter extends BaseAdapter {
 			holder = (ViewHolder) convertView.getTag();
 		}
 		final PlurkListItem item = plurks.get(index);
+		final ImageView iv = holder.avatar;
+		holder.avatar.setImageResource(R.drawable.avatar_unknown);
+		new FetchAvatarTask().execute(iv, String.valueOf(item.getUserId()), item.getAvatarIndex());
 		
-		Bitmap avatar = item.getAvatar();
-		if (avatar != null) {
-			holder.avatar.setImageBitmap(avatar);
-		} else {
-			holder.avatar.setImageResource(R.drawable.avatar_unknown);
-		}
 		holder.nickname.setText(item.getNickname());
         holder.qualifier.setText(item.getQualifierTranslated());
         String qualifier = item.getQualifier();
@@ -136,7 +133,6 @@ public class PlurkListAdapter extends BaseAdapter {
         convertView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 parentList.performItemClick(parentList, ind, item.getPlurkId());
-            	//view.performLongClick();
             }
         });
         
@@ -163,4 +159,25 @@ public class PlurkListAdapter extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 	
+	private class FetchAvatarTask extends AsyncTask<Object, Integer, Bitmap> {
+
+        ImageView imageView;
+    
+        @Override
+        protected Bitmap doInBackground(Object... params) {
+            imageView = (ImageView) params[0];
+    
+            PlurkHelper p = new PlurkHelper(context);
+            Bitmap avatar = p.getAvatar((String) params[1], "medium", (String) params[2]);
+    
+            return avatar;
+        }   
+    
+        @Override
+        protected void onPostExecute(Bitmap avatar) {
+            if (avatar != null) {
+                imageView.setImageBitmap(avatar);
+            }   
+        }   
+    }
 }

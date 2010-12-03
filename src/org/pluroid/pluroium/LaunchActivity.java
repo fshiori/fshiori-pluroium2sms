@@ -36,7 +36,6 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 	private EditText passwordField;
 	private CheckBox rememberBox;
 	private Button loginButton;
-	private Button signupButton;
 	
 	private PlurkHelper plurkHelper;
 	private Bundle extras;
@@ -90,8 +89,6 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 		
 		if (view == loginButton) {
 			performLogin();
-		} else if (view == signupButton) {
-			
 		}
 	}
 	
@@ -122,9 +119,6 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 		loginButton = (Button) findViewById(R.id.login_button);
 		loginButton.setOnClickListener(this);
 		
-		signupButton = (Button) findViewById(R.id.signup_button);
-		signupButton.setOnClickListener(this);
-
 		String username = sharedPref.getString(Constant.PREF_AUTH_USERNAME_KEY, "");
 		String password = sharedPref.getString(Constant.PREF_AUTH_PASSWORD_KEY, "");
 
@@ -208,7 +202,6 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 		rememberBox.setEnabled(enabled);
 		loginButton.setEnabled(enabled);
 		loginButton.setText(enabled ? R.string.login_button_text : R.string.loging_button_text);
-		signupButton.setEnabled(enabled);
 	}
 	
 	private class LoginTask extends AsyncTask<String, Integer, Boolean> {

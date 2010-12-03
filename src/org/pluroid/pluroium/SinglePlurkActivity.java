@@ -21,7 +21,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -57,6 +56,7 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 	private View bottomPanel;
 	private MenuItem refreshItem;
 	
+	private Context context;
 	private PlurkHelper plurkHelper;
 	private List<PlurkListItem> responses;
 	private boolean loading;
@@ -97,6 +97,7 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		context = this;
 		
 		plurkHelper = new PlurkHelper(this);
 		ime = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -156,10 +157,7 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 		Bundle plurkData = getIntent().getExtras();
 		
 		ImageView avatarView = (ImageView) hdView.findViewById(R.id.single_plurk_author_avatar);
-		Parcelable p = plurkData.getParcelable("avatar");
-		if (p != null) {
-			avatarView.setImageBitmap((Bitmap) p);
-		}
+		new FetchAvatarTask().execute(avatarView, plurkData.getString("userId"), plurkData.getString("avatar_index"));
 		TextView nicknameView = (TextView) hdView.findViewById(R.id.single_plurk_owner);
 		nicknameView.setText(plurkData.getString("nickname"));
 		TextView qualifierView = (TextView) hdView.findViewById(R.id.single_plurk_qualifier);
@@ -295,4 +293,26 @@ public class SinglePlurkActivity extends Activity implements View.OnClickListene
 			msgHandler.sendEmptyMessage(MSG_LOAD_RESPONSES);
 		}
 	}
+	
+	private class FetchAvatarTask extends AsyncTask<Object, Integer, Bitmap> {
+
+        ImageView imageView;
+    
+        @Override
+        protected Bitmap doInBackground(Object... params) {
+            imageView = (ImageView) params[0];
+    
+            PlurkHelper p = new PlurkHelper(context);
+            Bitmap avatar = p.getAvatar((String) params[1], "medium", (String) params[2]);
+    
+            return avatar;
+        }   
+    
+        @Override
+        protected void onPostExecute(Bitmap avatar) {
+            if (avatar != null) {
+                imageView.setImageBitmap(avatar);
+            }   
+        }   
+    }
 }

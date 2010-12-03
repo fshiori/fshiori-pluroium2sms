@@ -63,28 +63,5 @@
         </LinearLayout>
         
     </LinearLayout>
-    
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="right"
-        android:layout_marginTop="5dip">
-    
-        <TextView 
-            android:text="@string/not_member_text"
-            android:textStyle="bold"
-            android:paddingRight="10dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        
-        <Button android:id="@+id/signup_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/signup_button_text"
-            android:enabled="false"
-            android:paddingLeft="25dip"
-            android:paddingRight="25dip"/>
-        
-    </LinearLayout>
 
 </LinearLayout>

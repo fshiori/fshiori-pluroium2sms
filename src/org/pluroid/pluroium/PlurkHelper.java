@@ -1,13 +1,13 @@
 package org.pluroid.pluroium;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
@@ -23,12 +23,15 @@ import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +44,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -64,9 +68,11 @@ public class PlurkHelper {
 
 	private static DefaultHttpClient httpClient;
 	private static BasicCookieStore cookieStore;
-	private static HashMap<Long, Bitmap> avatarCache;
 	private static HashMap<String, Drawable> imgSrcCache;
 
+	// HTTP client parameters
+    public static final int REGISTRATION_TIMEOUT = 30 * 1000; // ms
+    public static final String USER_AGENT = "Pluroium/2.0";
 	private static SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 
 	// API URI
@@ -80,7 +86,6 @@ public class PlurkHelper {
 	
 	static {
         imgSrcCache = new HashMap<String, Drawable>();
-		avatarCache = new HashMap<Long, Bitmap>();
 		httpClient = new DefaultHttpClient();
 		cookieStore = new BasicCookieStore();
 		httpClient.setCookieStore(cookieStore);
@@ -94,6 +99,12 @@ public class PlurkHelper {
 		
 		// read cookie
 		cookieStore.clear();
+		
+		HttpParams params = httpClient.getParams();
+        HttpConnectionParams.setConnectionTimeout(params,
+            REGISTRATION_TIMEOUT);
+        HttpConnectionParams.setSoTimeout(params, REGISTRATION_TIMEOUT);
+        ConnManagerParams.setTimeout(params, REGISTRATION_TIMEOUT);
 		
 		String cookieStr = sharedPref.getString(Constant.PREF_COOKIE, "");
 		if (cookieStr.length() > 0) {
@@ -179,8 +190,8 @@ public class PlurkHelper {
 					
 					Editor prefEdit = sharedPref.edit();
 					
-					prefEdit.putString(Constant.PREF_AUTH_USERNAME_KEY, isRemember ? username : "");
-					prefEdit.putString(Constant.PREF_AUTH_PASSWORD_KEY, isRemember ? password : "");
+					prefEdit.putString(Constant.PREF_AUTH_USERNAME_KEY, username);
+					prefEdit.putString(Constant.PREF_AUTH_PASSWORD_KEY, password);
 					
 					// store cookie
 					cookie = cookieStore.getCookies().get(0);
@@ -280,7 +291,10 @@ public class PlurkHelper {
             HttpResponse resp = httpClient.execute(post);
             int status = resp.getStatusLine().getStatusCode();
             
-            if (status == HttpStatus.SC_OK) {
+            if (status == HttpStatus.SC_BAD_REQUEST) {	// Requires login
+            	this.logined = false;
+            	return null;
+            } else if (status == HttpStatus.SC_OK) {
             	String responseText = getResponseText(resp.getEntity().getContent());
             	
             	JSONObject plurkObject = new JSONObject(responseText);
@@ -366,7 +380,7 @@ public class PlurkHelper {
                     
                     ret.add(item);
                 }
-            } 
+            }
 		} catch (Exception e) {
 			Log.e(TAG, "Get plurks failed! Reason: " + e.getMessage());
 		}
@@ -503,39 +517,64 @@ public class PlurkHelper {
 		return result;
 	}
 	
-		
-	public Bitmap getAvatar(long userId, String scale, String avatarIndex) {
+	
+	public Bitmap getAvatar(String userId, String scale, String avatarIndex) {
 		Bitmap avatar = null;
 		
-		avatar = avatarCache.get(userId);
-		if ("0".equals(avatarIndex)) {
-			avatarIndex = "";
-		}
-		if (avatar == null) {
-			String url = "http://avatars.plurk.com/"+userId+"-"+scale+avatarIndex+".gif";
-			BufferedInputStream bis = null;
-			try {
-				URL avatarUrl = new URL(url);
-				URLConnection conn = avatarUrl.openConnection();
-				conn.connect();
-				bis = new BufferedInputStream(conn.getInputStream(), 8192);
-				avatar = BitmapFactory.decodeStream(bis);
-				
-				avatarCache.put(userId, avatar);
-				
-			} catch (MalformedURLException e) {
-				Log.e(TAG, "avatar url error: " + url);
-			} catch (IOException e) {
-				Log.e(TAG, "fetching avatar fail! ("+url+")");
-			} finally {
-				if (bis != null) {
-					try {
-						bis.close();
-					} catch (IOException e) {
-					}
-				}
-			}
-		}
+		try {
+            File cacheDir = Utils.ensureCache(context);
+            if ("".equals(avatarIndex)) {
+                avatarIndex = "0";
+            }   
+    
+            String filename = avatarIndex+".png";
+            File d = new File(cacheDir, userId);
+            if (d.exists()) {
+                File f = new File(d, filename);
+                if (f.exists()) {
+                    FileInputStream fis = new FileInputStream(f);
+                    avatar = BitmapFactory.decodeStream(fis);
+                }   
+            }   
+    
+        } catch (IOException e) {
+            Log.e(TAG, "Read avatar cache failed!", e); 
+        }
+        
+        if (avatar == null) {
+            // re-fetch the avatar
+            if ("0".equals(avatarIndex)) {
+                avatarIndex = "";
+            }
+            String url = "http://avatars.plurk.com/"+userId+"-"+scale+avatarIndex+".gif";
+            InputStream is = null;
+            try {
+                URL avatarUrl = new URL(url);
+                is = (InputStream) avatarUrl.getContent();
+
+                avatar = BitmapFactory.decodeStream(is);
+
+                File cacheDir = Utils.ensureCache(context);
+                if ("".equals(avatarIndex)) {
+                    avatarIndex = "0";
+                }
+                String filename = avatarIndex+".png";
+                File d = new File(cacheDir, userId);
+                if (!d.exists()) {
+                    d.mkdirs();
+                }
+
+                File f = new File(d, filename);
+                if (!f.exists()) {
+                    f.createNewFile();
+                    FileOutputStream fos = new FileOutputStream(f);
+                    avatar.compress(CompressFormat.PNG, 100, fos);
+                    fos.close();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Fetch avatar fail!", e);
+            }
+        }
 		
 		return avatar;
 	}
