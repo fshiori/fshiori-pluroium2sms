@@ -5,39 +5,32 @@
     android:layout_height="fill_parent">
 
     <!-- UI Header -->
-    <RelativeLayout android:id="@+id/single_plurk_header"
-        android:layout_width="fill_parent" 
-        android:layout_height="?android:attr/windowTitleSize"
-        android:background="#cf682f"
-        android:paddingLeft="5dip"
+    <LinearLayout style="@style/TitleBar" android:id="@+id/plurk_header"
         android:layout_alignParentTop="true">
-    
-        <TextView android:id="@+id/single_page_title" 
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" 
-            style="?android:attr/windowTitleStyle"
-            android:fadingEdge="horizontal"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="Pluroid" />
+
+        <ImageView style="@style/TitleBarLogo"
+            android:src="@drawable/title_logo" />
+
+        <View style="@style/TitleBarSpring" />
+
+        <ProgressBar style="@style/TitleBarProgressIndicator"
+            android:id="@+id/title_refresh_progress"
+            android:visibility="gone" />
             
-        <ProgressBar android:id="@+id/single_load_progressing" 
-            style="?android:attr/progressBarStyleSmall"
-            android:visibility="gone"
-            android:max="10000"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="6dip"
-            android:layout_marginRight="3dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    
-    </RelativeLayout>
+        <ImageView style="@style/TitleBarSeparator" />
+        
+        <ImageButton style="@style/TitleBarAction"
+            android:id="@+id/btn_title_refresh"
+            android:contentDescription="@string/description_refresh"
+            android:src="@drawable/ic_title_refresh"
+            android:onClick="onRefreshClick" />
+            
+    </LinearLayout>
     
     <View android:id="@+id/single_plurk_divider"
         android:layout_width="fill_parent"
         android:layout_height="1dip"
-        android:layout_below="@id/single_plurk_header"
+        android:layout_below="@id/plurk_header"
         android:background="@android:drawable/divider_horizontal_dark" />
 
     <LinearLayout android:id="@+id/single_plurk_bottom_container"
@@ -72,7 +65,7 @@
 	              android:layout_weight="1"
 	              android:layout_toRightOf="@id/single_plurk_response_qualifier"
 	              android:layout_height="wrap_content"
-	              android:hint="Click to comment..."
+	              android:hint="@string/click_to_comment"
 	              android:nextFocusUp="@id/single_plurk_response_text"
                 android:nextFocusLeft="@id/single_plurk_response_text" />
         

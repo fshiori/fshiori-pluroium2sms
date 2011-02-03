@@ -26,6 +26,9 @@ public class PluroiumApplication extends Application {
         "is"
     };
 	
+	public static final String PREF_RESIZE_PHOTO = "pref_upload_resize";
+	public static final String PREF_USE_EXTERNAL = "pref_use_external";
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();

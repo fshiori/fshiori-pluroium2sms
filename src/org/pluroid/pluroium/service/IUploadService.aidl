@@ -1,6 +1,6 @@
-package org.pluroid.pluroium;
+package org.pluroid.pluroium.service;
 
-import org.pluroid.pluroium.IUploadServiceCallback;
+import org.pluroid.pluroium.service.IUploadServiceCallback;
 
 interface IUploadService {
 

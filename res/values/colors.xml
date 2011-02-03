@@ -2,4 +2,39 @@
 <resources>
     <color name="black">#000</color>
     <color name="white">#fff</color>
+    
+    <color name="title_background">#ffcf682f</color>
+    <color name="title_text">#ffffffff</color>
+    <color name="title_text_alt">#ff000000</color>
+    <color name="foreground1">#ff355689</color>
+    <color name="foreground2">#ff7081a3</color>
+    <color name="background">#ffcae7fd</color>
+    <color name="background_alt">#ffcf682f</color>
+    <color name="background1">#ffffffff</color>
+    <color name="background2">#ffd5ddeb</color>
+    <color name="background3">#ffe3e8f1</color>
+    <color name="title_separator">#40ffffff</color>
+    <color name="session_foreground_past">#ff999999</color>
+    <color name="pinned_header_background">#ff202020</color>
+
+    <!-- qualifiers -->
+    <color name="qualifier_loves">#ffb20c0c</color>
+    <color name="qualifier_likes">#ffcb2728</color>
+    <color name="qualifier_shares">#ffa74949</color>
+    <color name="qualifier_gives">#ff620e0e</color>
+    <color name="qualifier_hates">#ff000000</color>
+    <color name="qualifier_wants">#ff8db24e</color>
+    <color name="qualifier_wishes">#ff5bb017</color>
+    <color name="qualifier_needs">#ff7a9a37</color>
+    <color name="qualifier_will">#ffb46db9</color>
+    <color name="qualifier_hopes">#ffe05be9</color>
+    <color name="qualifier_asks">#ff8361bc</color>
+    <color name="qualifier_has">#ff777777</color>
+    <color name="qualifier_was">#ff525252</color>
+    <color name="qualifier_wonders">#ff2e4e9e</color>
+    <color name="qualifier_feels">#ff2d83be</color>
+    <color name="qualifier_thinks">#ff689cc1</color>
+    <color name="qualifier_says">#ffe2560b</color>
+    <color name="qualifier_is">#ffe57c43</color>
+    
 </resources>

@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="timezone_entries">
-    </string-array>
-    
-    <string-array name="timezone_values">
-    
-    </string-array>
-    
-
     <string-array name="plurk_types">
         <item>All plurks</item>
         <item>My plurks</item>
         <item>Private plurks</item>
         <item>Responded plurks</item>
-        <item>Unread plurks</item>
+        <item>Unread</item>
+        <item>Favorited plurks</item>
     </string-array>
     
     <string-array name="qualifiers">
@@ -124,6 +117,8 @@
         <item>e3f0f67ca3af62e34f13abf1d036a010</item>
         <item>84f94a47fcaf1df0a5f17a1cfa52fa64</item>
         <item>44117848701cd748460921cfea5c3781</item> <!-- (taser) -->
+        <item>0efc4d55d28704f4370ef874ae906161</item> <!-- (code) -->
+        <item>3acbaf42504fff32c5eac4f12083ce56</item> <!-- (yarr_okok) -->
     </string-array>
     
     <string-array name="emotion_text">
@@ -198,6 +193,29 @@
         <item>(eyeroll)</item>
         <item>(muhaha)</item>
         <item>(taser)</item>
+        <item>(code)</item>
+        <item>(yarr_okok)</item>
+    </string-array>
+    
+    <string-array name="compose_camera_options">
+        <item>Take a photo</item>
+        <item>Choose from gallery</item>
+    </string-array>
+    
+    <string-array name="compose_location_options">
+        <item>Get current position</item>
+    </string-array>
+    
+    <string-array name="pref_resize_option_keys">
+        <item>no</item>
+        <item>medium</item>
+        <item>small</item>
+    </string-array>
+    
+    <string-array name="pref_resize_option_titles">
+        <item>No resize</item>
+        <item>Medium (640px)</item>
+        <item>Small (240px)</item>
     </string-array>
     
 </resources>

@@ -8,8 +8,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -17,19 +22,36 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.params.ConnManagerParams;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.scheme.LayeredSocketFactory;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.SocketFactory;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
@@ -46,18 +68,14 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.text.Html;
-import android.text.SpannableStringBuilder;
 import android.util.Log;
 
 public class PlurkHelper {
 	
 	private static final String TAG = "PlurkHelper";
-	private static final String API_KEY = "PUT_YOUR_API_KEY_HERE";
+	private static final String API_KEY = "5RxREItWmVXGNvzaMTiwGgWIGpKfMAd3";
 	private SharedPreferences sharedPref;
 
 	private Context context;
@@ -66,13 +84,17 @@ public class PlurkHelper {
 	private String password;
 	private boolean logined;
 
-	private static DefaultHttpClient httpClient;
-	private static BasicCookieStore cookieStore;
-	private static HashMap<String, Drawable> imgSrcCache;
+	private DefaultHttpClient httpClient;
+	private BasicCookieStore cookieStore;
+	private ClientConnectionManager connMgr;
 
 	// HTTP client parameters
-    public static final int REGISTRATION_TIMEOUT = 30 * 1000; // ms
-    public static final String USER_AGENT = "Pluroium/2.0";
+	// TCP timeouts
+	private final static int CONNECT_TIMEOUT = 20000;
+	private final static int READ_TIMEOUT = 45000;
+	
+	public static final int REGISTRATION_TIMEOUT = 30 * 1000; // ms
+    public static final String USER_AGENT = "Pluroid/2.0";
 	private static SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 
 	// API URI
@@ -83,44 +105,159 @@ public class PlurkHelper {
 	private static final String GET_RESPONSES_URL = "/Responses/get";
 	private static final String RESPOND_PLURK_URL = "/Responses/responseAdd";
 	private static final String UPLOAD_PHOTO_URL = "/Timeline/uploadPicture";
+	private static final String USER_PUBLIC_INFO_URL = "/Profile/getPublicProfile";
 	
-	static {
-        imgSrcCache = new HashMap<String, Drawable>();
-		httpClient = new DefaultHttpClient();
-		cookieStore = new BasicCookieStore();
-		httpClient.setCookieStore(cookieStore);
+	/**
+	 * SSL Socket factory 
+	 */
+	private static class MySSLSocketFactory implements SocketFactory, LayeredSocketFactory {
+		/**
+		 * Constructor
+		 */
+		public MySSLSocketFactory()
+		{
+			if( m_sslSocketFactory == null)
+			{
+				try
+				{
+					SSLContext sc = SSLContext.getInstance( "TLS");
+					sc.init( null, null, null);
+					m_sslSocketFactory = sc.getSocketFactory();
+					//Log.v( "MySSLSocketFactory", "Socket factory");
+				}
+				catch( Exception ex)
+				{
+
+				}
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.apache.http.conn.scheme.SocketFactory#connectSocket(java.net.Socket, java.lang.String, int, java.net.InetAddress, int, org.apache.http.params.HttpParams)
+		 */
+		public Socket connectSocket( Socket socket, String host, int port, InetAddress localAddress, int localPort, HttpParams params) throws IOException, UnknownHostException, ConnectTimeoutException
+		{
+			if( socket == null)
+			{
+				socket = createSocket();
+			}
+			//Log.v( "MySSLSocketFactory.connectSocket", "Connecting to: " + host + "/" + port);
+			if( (localAddress != null) || (localPort > 0))
+			{ // We need to bind explicitly
+				if( localPort < 0)
+				{
+					localPort = 0; // indicates "any"
+				}
+				socket.bind( new InetSocketAddress( localAddress, localPort));
+			}
+			socket.setSoTimeout( HttpConnectionParams.getSoTimeout( params));
+			socket.connect( new InetSocketAddress( host, port), HttpConnectionParams.getConnectionTimeout( params));
+			//Log.v( "MySSLSocketFactory.connectSocket", "Connected");
+			return socket;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.apache.http.conn.scheme.SocketFactory#createSocket()
+		 */
+		public Socket createSocket() throws IOException
+		{
+			return m_sslSocketFactory.createSocket();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.apache.http.conn.scheme.LayeredSocketFactory#createSocket(java.net.Socket, java.lang.String, int, boolean)
+		 */
+		public Socket createSocket( Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException
+		{
+			return m_sslSocketFactory.createSocket();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.apache.http.conn.scheme.SocketFactory#isSecure(java.net.Socket)
+		 */
+		public boolean isSecure( Socket socket) throws IllegalArgumentException
+		{
+			return true;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals( Object obj)
+		{
+			return((obj != null) && obj.getClass().equals( MySSLSocketFactory.class));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode()
+		{
+			return MySSLSocketFactory.class.hashCode();
+		}
+
+		/**
+		 * Member variables
+		 */
+		private static SSLSocketFactory m_sslSocketFactory;
 	}
+	
+	private static final SchemeRegistry m_supportedSchemes = new SchemeRegistry();
+	static {
+		// Setup the schemes
+		// Register the "http" and "https" protocol schemes, they are required by the default operator to look up socket factories.
+		m_supportedSchemes.register( new Scheme( "http", PlainSocketFactory.getSocketFactory(), 80));
+		m_supportedSchemes.register( new Scheme( "https", new MySSLSocketFactory(), 443));
+	}
+	
+	// URL shorten options
+	public static final int URL_SHORTEN_GOOGL = 0;
+	private static final String GOOGL_SHORTEN_API_URL = "https://www.googleapis.com/urlshortener/v1/url";
+	public static final int URL_SHORTEN_BITLY = 1;
 	
 	public PlurkHelper(Context context) {
 		this.context = context;
-		
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-		// initial static members
-		
-		// read cookie
-		cookieStore.clear();
-		
-		HttpParams params = httpClient.getParams();
-        HttpConnectionParams.setConnectionTimeout(params,
-            REGISTRATION_TIMEOUT);
-        HttpConnectionParams.setSoTimeout(params, REGISTRATION_TIMEOUT);
-        ConnManagerParams.setTimeout(params, REGISTRATION_TIMEOUT);
-		
-		String cookieStr = sharedPref.getString(Constant.PREF_COOKIE, "");
-		if (cookieStr.length() > 0) {
-			String[] token = cookieStr.split(";");
-			BasicClientCookie cookie = new BasicClientCookie(token[0], token[1]);
-			cookie.setDomain(token[2]);
-			cookie.setPath(token[3]);
-			cookie.setExpiryDate(new Date(Long.parseLong(token[4])));
-			cookieStore.addCookie(cookie);			
+		createHttpClient();
+	}
+	
+	private void createHttpClient() {
+		if (httpClient == null) {
+			HttpParams params = new BasicHttpParams();
+			params.setParameter( "http.socket.timeout", new Integer( READ_TIMEOUT));
+			params.setParameter( "http.connection.timeout", new Integer( CONNECT_TIMEOUT));
+			connMgr = new SingleClientConnManager( params, m_supportedSchemes);
+	
+			httpClient = new DefaultHttpClient(connMgr, params);
+			cookieStore = new BasicCookieStore();
+			
+			String cookieStr = sharedPref.getString(Constant.PREF_COOKIE, "");
+			if (cookieStr.length() > 0) {
+				String[] token = cookieStr.split(";");
+				BasicClientCookie cookie = new BasicClientCookie(token[0], token[1]);
+				cookie.setDomain(token[2]);
+				cookie.setPath(token[3]);
+				cookie.setExpiryDate(new Date(Long.parseLong(token[4])));
+				cookieStore.addCookie(cookie);			
+			}
+			httpClient.setCookieStore(cookieStore);
+			
+			httpClient.removeRequestInterceptorByClass(
+					org.apache.http.protocol.RequestExpectContinue.class);
 		}
 	}
 	
 	
 	public boolean isLoginned() {
 		boolean loginned = false;
-		
 		if (cookieStore != null) {
 			List<Cookie> cookies = cookieStore.getCookies();
 			if (cookies.size() > 0) {
@@ -174,18 +311,13 @@ public class PlurkHelper {
 			prefEditor.commit();
 
 			try {
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("api_key", API_KEY));
-				params.add(new BasicNameValuePair("username", username));
-				params.add(new BasicNameValuePair("password", password));
-				
-				HttpPost post = new HttpPost(getApiUri(LOGIN_URL));
-				post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-				
-				HttpResponse resp = httpClient.execute(post);
-				int status = resp.getStatusLine().getStatusCode();
-				
-				if (status == HttpStatus.SC_OK) {	// successfully login
+				HashMap<String, String> params = new HashMap<String, String>();
+				params.put("username", username);
+				params.put("password", password);
+
+				Response resp = performRequest(getApiUri(LOGIN_URL), params);
+				Log.d(TAG, "LOGIN status: " + resp.statusCode);
+				if (resp.statusCode == HttpStatus.SC_OK) {	// successfully login
 					logined = true;
 					
 					Editor prefEdit = sharedPref.edit();
@@ -220,10 +352,10 @@ public class PlurkHelper {
             Configuration conf = res.getConfiguration();
 			
 			String lang = "en";
-            if (conf.locale == Locale.TRADITIONAL_CHINESE) {
+            if (conf.locale == Locale.TAIWAN) {
                 lang = "tr_ch";
             }
-			
+            
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("api_key", API_KEY));
 			params.add(new BasicNameValuePair("qualifier", qualifier));
@@ -240,6 +372,8 @@ public class PlurkHelper {
 			
 		} catch (Exception e) {
 			Log.e(TAG, "Add plurk error: ", e);
+		} finally {
+			connMgr.shutdown();
 		}
 		
 		return result;
@@ -260,44 +394,40 @@ public class PlurkHelper {
 		
 		try {
 			
-			List<NameValuePair> params = new ArrayList<NameValuePair>();
-			params.add(new BasicNameValuePair("api_key", API_KEY));
-			params.add(new BasicNameValuePair("offset", dateOffset));
-			params.add(new BasicNameValuePair("limit", String.valueOf(limit)));
-			
-			Log.d(TAG, whichView + "," + limit + ", " + dateOffset);
+			HashMap<String, String> params = new HashMap<String, String>();
+			params.put("offset", dateOffset);
+			params.put("limit", String.valueOf(limit));
 			
 			if (whichView == 1) {
-	            params.add(new BasicNameValuePair("only_user", "true"));
+	            params.put("only_user", "true");
 	        }
 
 	        if (whichView == 2) {
-	            params.add(new BasicNameValuePair("only_private", "true"));
+	            params.put("only_private", "true");
 	        }
 
 	        if (whichView == 3) {
-	            params.add(new BasicNameValuePair("only_responded", "true"));
+	            params.put("only_responded", "true");
 	        }
+	        
 
-	        HttpPost post;
+	        String url;
 	        if (whichView == 4) {
-	        	post = new HttpPost(getApiUri(GET_UNREAD_URL));
+	        	url = getApiUri(GET_UNREAD_URL);
 	        } else {
-	        	post = new HttpPost(getApiUri(GET_PLURKS_URL));
+	        	url = getApiUri(GET_PLURKS_URL);
+	        }
+	        if (whichView == 5) {
+	        	params.put("only_favorite", "true");
 	        }
 	        
-	        
-	        post.setEntity(new UrlEncodedFormEntity(params,"utf-8"));
-            HttpResponse resp = httpClient.execute(post);
-            int status = resp.getStatusLine().getStatusCode();
-            
-            if (status == HttpStatus.SC_BAD_REQUEST) {	// Requires login
+	        Response resp = performRequest(url, params);
+	        Log.d(TAG, "Resp status:" + resp.statusCode);
+            if (resp.statusCode == HttpStatus.SC_BAD_REQUEST) {	// Requires login
             	this.logined = false;
             	return null;
-            } else if (status == HttpStatus.SC_OK) {
-            	String responseText = getResponseText(resp.getEntity().getContent());
-            	
-            	JSONObject plurkObject = new JSONObject(responseText);
+            } else if (resp.statusCode == HttpStatus.SC_OK) {            	
+            	JSONObject plurkObject = new JSONObject(resp.responseText);
             	JSONObject plurkUsers = plurkObject.getJSONObject("plurk_users");
                 JSONArray plurks = plurkObject.getJSONArray("plurks");
                 int plurksCount = plurks.length();
@@ -305,9 +435,10 @@ public class PlurkHelper {
                 ret = new ArrayList<PlurkListItem>();
                 for (int i = 0; i < plurksCount; ++i) {
                 	PlurkListItem item = new PlurkListItem();
-                	
+
                 	JSONObject plurk = plurks.getJSONObject(i);
-                    String userId = plurk.getString("owner_id");
+
+                	String userId = plurk.getString("owner_id");
                     JSONObject userJson = plurkUsers.getJSONObject(userId);
                     String nickname;
                     try {
@@ -338,30 +469,8 @@ public class PlurkHelper {
                     }
                     
                     item.setQualifierTranslated(q);
-                    String content = plurk.getString("content");
-                    item.setRawContent(content);
-                    item.setContent((SpannableStringBuilder) Html.fromHtml(content, new Html.ImageGetter() {
-						public Drawable getDrawable(String source) {
-							try {
-								if (imgSrcCache.containsKey(source)) {
-									return imgSrcCache.get(source);
-								} else {
-									URLConnection conn = new URL(source).openConnection();
-									conn.connect();
-									
-									InputStream is = conn.getInputStream();
-									Bitmap bmp = BitmapFactory.decodeStream(is);
-									Drawable d = new BitmapDrawable(bmp);
-									d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
-									is.close();
-									imgSrcCache.put(source, d);
-									return d;
-								}
-							} catch (Exception e) {
-								return null;
-							}
-						}
-					}, null));
+                    item.setRawContent(plurk.getString("content_raw"));
+                    item.setContent(plurk.getString("content"));
                     item.setResponses(plurk.getInt("response_count"));
                     
                     String limited = plurk.getString("limited_to");
@@ -372,11 +481,22 @@ public class PlurkHelper {
                     }
                     
                     item.setHasSeen((byte)(1 - plurk.getInt("is_unread")));
-                    String utcPosted = plurk.getString("posted");
-                    item.setUtcPosted(utcPosted);
 
-                    String posted = sdf.parse(utcPosted).toLocaleString();
-                    item.setPosted(posted);
+                    String utcPosted = plurk.getString("posted");
+                    //item.setUtcPosted(utcPosted);
+                    item.setPosted(sdf.parse(utcPosted));
+                    
+                    // favoriters
+                    int favCount = plurk.getInt("favorite_count");
+                    item.setFavorites(favCount);
+                    if (favCount > 0) {
+                    	JSONArray favs = plurk.getJSONArray("favorers");
+                    	List<String> f = new ArrayList<String>();
+                    	for (int j = 0; j < favs.length(); ++j) {
+                    		f.add(favs.getString(j));
+                    	}
+                    	item.setFavoriters(f);
+                    }
                     
                     ret.add(item);
                 }
@@ -392,19 +512,15 @@ public class PlurkHelper {
 	public List<PlurkListItem> getResponses(String plurkId) {
 		List<PlurkListItem> ret = null;
 		try {
-			HttpPost post = new HttpPost(getApiUri(GET_RESPONSES_URL));
-			
-			List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("api_key", API_KEY));
-            params.add(new BasicNameValuePair("plurk_id", plurkId));
-            params.add(new BasicNameValuePair("from_response", "0"));
-            post.setEntity(new UrlEncodedFormEntity(params, "utf-8"));
+			HashMap<String, String> params = new HashMap<String, String>();
+            params.put("plurk_id", plurkId);
+            params.put("from_response", "0");
             
-            HttpResponse resp = httpClient.execute(post);
-            int status = resp.getStatusLine().getStatusCode();
+            Response resp = performRequest(getApiUri(GET_RESPONSES_URL), params);
+            int status = resp.statusCode;
             if (status == HttpStatus.SC_OK) {
             	ret = new ArrayList<PlurkListItem>();
-            	String respText = getResponseText(resp.getEntity().getContent());
+            	String respText = resp.responseText;
                 JSONObject respond = new JSONObject(respText);
                 try {
                 	JSONObject friends = respond.getJSONObject("friends");
@@ -440,35 +556,17 @@ public class PlurkHelper {
                         }
                         
                         item.setQualifierTranslated(q);
-                        String content = jsonResp.getString("content");
-                        item.setRawContent(content);
-                        item.setContent((SpannableStringBuilder) Html.fromHtml(content, new Html.ImageGetter() {
-    						public Drawable getDrawable(String source) {
-    							try {
-    								if (imgSrcCache.containsKey(source)) {
-    									return imgSrcCache.get(source);
-    								} else {
-    									URLConnection conn = new URL(source).openConnection();
-    									conn.connect();
-    									
-    									InputStream is = conn.getInputStream();
-    									Bitmap bmp = BitmapFactory.decodeStream(is);
-    									Drawable d = new BitmapDrawable(bmp);
-    									d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
-    									is.close();
-    									imgSrcCache.put(source, d);
-    									return d;
-    								}
-    							} catch (Exception e) {
-    								return null;
-    							}
-    						}
-    					}, null));
+                        
+                        String avatarIndex = f.getString("avatar");
+                        if (avatarIndex == null || "null".equals(avatarIndex)) {
+                            avatarIndex = "";
+                        }
+                        item.setAvatarIndex(avatarIndex);
+                        
+                        item.setRawContent(jsonResp.getString("content_raw"));
+                        item.setContent(jsonResp.getString("content"));
                         String utcPosted = jsonResp.getString("posted");
-                        item.setUtcPosted(utcPosted);
-
-                        String posted = sdf.parse(utcPosted).toLocaleString();
-                        item.setPosted(posted);
+                        item.setPosted(sdf.parse(utcPosted));
                         
                         ret.add(item);
                     }
@@ -488,12 +586,11 @@ public class PlurkHelper {
 		boolean result = false;
 		
 		try {
-			HttpPost post = new HttpPost(getApiUri(RESPOND_PLURK_URL));
-			List<NameValuePair> params = new ArrayList<NameValuePair>();
-	        params.add(new BasicNameValuePair("api_key", API_KEY));
-	        params.add(new BasicNameValuePair("plurk_id", plurkId));
-	        params.add(new BasicNameValuePair("qualifier", qualifier));
-	        params.add(new BasicNameValuePair("content", content));
+			HashMap<String, String> params = new HashMap<String, String>();
+	        params.put("api_key", API_KEY);
+	        params.put("plurk_id", plurkId);
+	        params.put("qualifier", qualifier);
+	        params.put("content", content);
 	        
             Configuration conf = context.getResources().getConfiguration();
             String lang = "en";
@@ -501,33 +598,30 @@ public class PlurkHelper {
                 lang = "tr_ch";
             }
             
-            params.add(new BasicNameValuePair("lang", lang));
-	        
-	        post.setEntity(new UrlEncodedFormEntity(params, "utf-8"));
-            HttpResponse resp = httpClient.execute(post);
+            params.put("lang", lang);	        
+            Response resp = performRequest(getApiUri(RESPOND_PLURK_URL), params);
 
-            if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            if (resp.statusCode == HttpStatus.SC_OK) {
                 result = true;
             }
 	        
 		} catch (Exception e) {
 			Log.e(TAG, "addResponse failed!", e);
+		} finally {
+			connMgr.shutdown();
 		}
 		
 		return result;
-	}
-	
-	
+	}	
+		
 	public Bitmap getAvatar(String userId, String scale, String avatarIndex) {
 		Bitmap avatar = null;
-		
 		try {
-            File cacheDir = Utils.ensureCache(context);
-            if ("".equals(avatarIndex)) {
+            File cacheDir = Utils.ensureCache(context, "avatars");
+            if ("".equals(avatarIndex) || "null".equals(avatarIndex) || avatarIndex == null) {
                 avatarIndex = "0";
-            }   
-    
-            String filename = avatarIndex+".png";
+            }
+            String filename = scale+"-"+avatarIndex+".png";
             File d = new File(cacheDir, userId);
             if (d.exists()) {
                 File f = new File(d, filename);
@@ -543,33 +637,40 @@ public class PlurkHelper {
         
         if (avatar == null) {
             // re-fetch the avatar
-            if ("0".equals(avatarIndex)) {
+            if ("0".equals(avatarIndex) || "null".equals(avatarIndex) || avatarIndex == null) {
                 avatarIndex = "";
             }
-            String url = "http://avatars.plurk.com/"+userId+"-"+scale+avatarIndex+".gif";
+            String suffix = ".gif";
+            if ("big".equals(scale)) {
+            	suffix = ".jpg";
+            }
+            String url = "http://avatars.plurk.com/"+userId+"-"+scale+avatarIndex+suffix;
             InputStream is = null;
             try {
+            	Log.d(TAG, "Fetch avatar: " + url);
                 URL avatarUrl = new URL(url);
                 is = (InputStream) avatarUrl.getContent();
 
                 avatar = BitmapFactory.decodeStream(is);
 
-                File cacheDir = Utils.ensureCache(context);
-                if ("".equals(avatarIndex)) {
-                    avatarIndex = "0";
-                }
-                String filename = avatarIndex+".png";
-                File d = new File(cacheDir, userId);
-                if (!d.exists()) {
-                    d.mkdirs();
-                }
-
-                File f = new File(d, filename);
-                if (!f.exists()) {
-                    f.createNewFile();
-                    FileOutputStream fos = new FileOutputStream(f);
-                    avatar.compress(CompressFormat.PNG, 100, fos);
-                    fos.close();
+                if (avatar != null) {
+	                File cacheDir = Utils.ensureCache(context, "avatars");
+	                if ("".equals(avatarIndex)) {
+	                    avatarIndex = "0";
+	                }
+	                String filename = scale+"-"+avatarIndex+".png";
+	                File d = new File(cacheDir, userId);
+	                if (!d.exists()) {
+	                    d.mkdirs();
+	                }
+	
+	                File f = new File(d, filename);
+	                if (!f.exists()) {
+	                    f.createNewFile();
+	                    FileOutputStream fos = new FileOutputStream(f);
+	                    avatar.compress(CompressFormat.PNG, 100, fos);
+	                    fos.close();
+	                }
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Fetch avatar fail!", e);
@@ -577,6 +678,85 @@ public class PlurkHelper {
         }
 		
 		return avatar;
+	}
+	
+	/**
+	 * Shorten an URL
+	 */
+	public String shortenUrl(String url, int option) {
+		String newUrl = url;
+		
+		try {
+			HttpPost post = new HttpPost();
+			if (option == URL_SHORTEN_GOOGL) {
+				post.setURI(URI.create(GOOGL_SHORTEN_API_URL));
+				post.addHeader("Content-Type", "application/json");
+		        post.setEntity(new StringEntity("{\"longUrl\": \""+ url + "\"}", "utf-8"));
+			}
+            HttpResponse resp = httpClient.execute(post);
+            int status = resp.getStatusLine().getStatusCode();
+            if (status == HttpStatus.SC_OK) {
+            	String respText = getResponseText(resp.getEntity().getContent());
+                Log.d(TAG, respText);
+            	JSONObject respond = new JSONObject(respText);
+                
+                if (option == URL_SHORTEN_GOOGL) {
+                	newUrl = respond.getString("id");
+                }
+            }
+		} catch (Exception e) {
+			Log.e(TAG, "URL shortening error!", e);
+		} finally {
+			connMgr.shutdown();
+		}
+		
+		return newUrl;
+	}
+	
+	/**
+	 * Upload a picture to the specified dst
+	 * @param photoUri
+	 * @param dst
+	 * @return
+	 */
+	public String uploadPicture(String photoPath, String contentType, String dst) {
+		String photoUrl = null;
+		
+		try {
+			String resize = sharedPref.getString(PluroiumApplication.PREF_RESIZE_PHOTO, "no");
+			
+			File f = Utils.resizePhoto(context, photoPath, resize);
+        	FileInputStream fis = new FileInputStream(f);
+        	String[] pathSegs = photoPath.split("/");
+
+        	ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
+        	writeFormField(baos, "api_key", API_KEY);
+        	writeFileField(baos, "image", pathSegs[pathSegs.length-1], contentType, fis);
+        	
+        	baos.write((twoHyphens + boundary + twoHyphens + CRLF).getBytes());
+        	fis.close();
+
+        	HttpPost post = new HttpPost(getApiUri(UPLOAD_PHOTO_URL));
+        	post.setHeader("Content-Type", "multipart/form-data; boundary="+boundary);
+        	post.setEntity(new ByteArrayEntity(baos.toByteArray()));
+        	
+        	HttpResponse resp = httpClient.execute(post);
+        	int status = resp.getStatusLine().getStatusCode();
+        	if (status == HttpStatus.SC_OK) {
+        		String respText = getResponseText(resp.getEntity().getContent());
+        		JSONObject jsonObj = new JSONObject(respText);
+        		photoUrl = jsonObj.getString("full");
+        	}
+        	
+        	f.delete();
+        	
+		} catch (Exception e) {
+			Log.e(TAG, "Upload photo failed!", e);
+		} finally {
+			connMgr.shutdown();
+		}
+		
+		return photoUrl;
 	}
 	
 	public boolean uploadPhoto(Uri photoUri, String caption) {
@@ -593,7 +773,11 @@ public class PlurkHelper {
         	String contentType = cur.getString(1);
         	cur.close();
 
-        	FileInputStream fis = new FileInputStream(photoPath);
+        	String resize = sharedPref.getString(PluroiumApplication.PREF_RESIZE_PHOTO, "no");
+			
+			File f = Utils.resizePhoto(context, photoPath, resize);
+        	
+        	FileInputStream fis = new FileInputStream(f);
         	String[] pathSegs = photoPath.split("/");
 
         	ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
@@ -618,8 +802,12 @@ public class PlurkHelper {
         	} else {
         		Log.e(TAG, "Upload resp: (" + status + ") " + respText);
         	}
+        	
+        	f.delete();
 		} catch (Exception e) {
 			Log.e(TAG, "Upload photo error: ", e);
+		} finally {
+			connMgr.shutdown();
 		}
 		
 		return result;
@@ -633,8 +821,8 @@ public class PlurkHelper {
      * @return
      * @throws IOException
      */
-    private String getResponseText(InputStream resp) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(resp, "UTF-8"), 8192);
+    private String getResponseText(InputStream is) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8192);
         StringBuffer respText = new StringBuffer();
         String line;
 
@@ -643,7 +831,7 @@ public class PlurkHelper {
         }
 
         br.close();
-
+        
         return respText.toString();
     }
     
@@ -678,5 +866,59 @@ public class PlurkHelper {
     	}
     	
     	baos.write(CRLF.getBytes());
+    }
+    
+    public static class Response {
+    	public int statusCode;
+    	public String responseText;
+    }
+    
+    private Response performRequest(String url, Map<String, String> reqParams) {
+		Response rsp = null;
+		
+    	ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("api_key", API_KEY));
+		for (String key : reqParams.keySet()) {
+			params.add(new BasicNameValuePair(key, reqParams.get(key)));
+		}
+		HttpEntity entity = null;
+		try {
+			entity = new UrlEncodedFormEntity(params, "UTF-8");
+		} catch (final UnsupportedEncodingException e) {
+			// this should never happen.
+			throw new AssertionError(e);
+		}
+        HttpPost post = new HttpPost(url);
+        post.addHeader(entity.getContentType());
+        post.addHeader("Accept-Encoding", "gzip,deflate");
+        post.setEntity(entity);
+        
+        try {
+        	HttpResponse resp = httpClient.execute(post);
+        	rsp = new Response();
+        	rsp.statusCode = resp.getStatusLine().getStatusCode();
+        	HttpEntity respEntity = resp.getEntity();
+        	InputStream is = null;
+        	if (respEntity.getContentEncoding() != null) {
+        		String contentEncoding = respEntity.getContentEncoding().getValue();
+        		if ("gzip".equals(contentEncoding)) {
+        			is = new GZIPInputStream(respEntity.getContent());
+        		} else if ("deflate".equals(contentEncoding)) {
+        			is = new InflaterInputStream(respEntity.getContent(), new Inflater(true));
+        		} else {
+        			is = respEntity.getContent();
+        		}
+        	} else {
+        		is = respEntity.getContent();
+        	}
+        	
+        	rsp.responseText = getResponseText(is);
+        } catch (IOException e) {
+        	Log.e(TAG, "Network access error!", e);
+        } finally {
+			connMgr.shutdown();
+        }
+        
+        return rsp;
     }
 }

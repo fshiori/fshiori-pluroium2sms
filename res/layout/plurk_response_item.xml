@@ -1,45 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:orientation="vertical"
     android:padding="6dip">
     
     <LinearLayout android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
-    
-        <TextView android:id="@+id/plurk_response_owner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="5dip"
-            android:textStyle="bold"
-            android:textColor="#000"
-            android:textSize="14dip" />
-            
+	    <TextView android:id="@+id/plurk_response_author"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        style="@style/PlurkDisplayname" />
+
         <TextView android:id="@+id/plurk_response_qualifier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingRight="5dip"
-            android:paddingLeft="5dip"
-            android:textColor="#fff" 
-            android:textSize="12dip" />
-    
+            style="@style/PlurkQualifier" />
+
     </LinearLayout>
     
     <TextView android:id="@+id/plurk_response_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dip"
-        android:textColor="#333"
-        android:textColorLink="#03c"/>
-        
+        style="@style/PlurkContent"/>
+
     <TextView android:id="@+id/plurk_response_posted"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="right"
+        android:layout_below="@id/plurk_response_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="right"
         android:textColor="#888"
-        android:paddingRight="8dip"
-        android:textSize="12dip" />
-    
+        android:textSize="11dip" />
+
 </LinearLayout>

@@ -1,4 +1,8 @@
-package org.pluroid.pluroium;
+package org.pluroid.pluroium.service;
+
+import org.pluroid.pluroium.PlurkActivity;
+import org.pluroid.pluroium.PlurkHelper;
+import org.pluroid.pluroium.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -30,14 +34,10 @@ public class UploadService extends Service {
 	private static final int MSG_START_UPLOAD = 1;
 	private static final int MSG_DONE_UPLOAD = 2;
 	
-	private PlurkHelper plurkHelper;
-	
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		
-		plurkHelper = new PlurkHelper(this);
 		
 		Log.v(TAG, "onCreate");
 	}
@@ -138,6 +138,7 @@ public class UploadService extends Service {
 	
 	private Runnable uploadPhotoThread = new Runnable() {
 		public void run() {
+			PlurkHelper plurkHelper = new PlurkHelper(UploadService.this);
 			plurkHelper.uploadPhoto(photoUri, photoText);
 			msgHandler.sendEmptyMessage(MSG_DONE_UPLOAD);
 		}

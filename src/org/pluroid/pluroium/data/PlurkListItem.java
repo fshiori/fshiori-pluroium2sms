@@ -1,7 +1,10 @@
 package org.pluroid.pluroium.data;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import android.graphics.Bitmap;
-import android.text.SpannableStringBuilder;
 
 public class PlurkListItem {
 
@@ -11,17 +14,18 @@ public class PlurkListItem {
 	private String 	qualifier;
 	private String 	qualifierTranslated;
 	private String  rawContent;
-	private SpannableStringBuilder content;
+	private String  content;
 	private int 	responses;
 	private long	plurkId;
 	private long	userId;
 	private String	limitTo;
 	private byte	hasSeen;
-	private String  utcPosted;
-	private String	posted;
+	private Date	posted;
+	private int		favorites;
+	private List<String>	favoriters;
 	
 	public PlurkListItem() {
-		
+		favoriters = new ArrayList<String>();
 	}
 	
 	public PlurkListItem(PlurkListItem i) {
@@ -36,65 +40,8 @@ public class PlurkListItem {
 		userId = i.userId;
 		limitTo = i.limitTo;
 		hasSeen = i.hasSeen;
-		utcPosted = i.utcPosted;
 		posted = i.posted;
 	}
-
-	/*
-	private PlurkListItem(Parcel in) {
-		avatar = in.readParcelable(null);
-		avatarIndex = in.readString();
-		nickname = in.readString();
-		qualifier = in.readString();
-		qualifierTranslated = in.readString();
-		content = in.readString();
-		responses = in.readInt();
-		plurkId = in.readLong();
-		userId = in.readLong();
-		limitTo = in.readString();
-		hasSeen = in.readByte();
-		posted = in.readString();
-	}
-	
-	public static final Parcelable.Creator<PlurkListItem> CREATOR =
-		new Parcelable.Creator<PlurkListItem>() {
-			
-			public PlurkListItem createFromParcel(Parcel p) {
-				PlurkListItem item = new PlurkListItem(p);
-				
-				if (item == null) {
-					throw new RuntimeException("Failed to unparcel PlurkListItem");
-				}
-				
-				return item;
-			}
-			
-			public PlurkListItem[] newArray(int size) {
-				return new PlurkListItem[size];
-			}
-		
-		};
-	
-	
-	public int describeContents() {
-		return 0;
-	}
-
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeParcelable(avatar, flags);
-		dest.writeString(avatarIndex);
-		dest.writeString(nickname);
-		dest.writeString(qualifier);
-		dest.writeString(qualifierTranslated);
-		dest.writeString(content);
-		dest.writeInt(responses);
-		dest.writeLong(plurkId);
-		dest.writeLong(userId);
-		dest.writeString(limitTo);
-		dest.writeByte(hasSeen);
-		dest.writeString(posted);
-	}
-	*/
 
 	public Bitmap getAvatar() {
 		return avatar;
@@ -128,11 +75,11 @@ public class PlurkListItem {
 		this.qualifierTranslated = qualifierTranslated;
 	}
 
-	public SpannableStringBuilder getContent() {
+	public String getContent() {
 		return content;
 	}
 
-	public void setContent(SpannableStringBuilder content) {
+	public void setContent(String content) {
 		this.content = content;
 	}
 
@@ -176,11 +123,11 @@ public class PlurkListItem {
 		this.hasSeen = hasSeen;
 	}
 
-	public String getPosted() {
+	public Date getPosted() {
 		return posted;
 	}
 
-	public void setPosted(String posted) {
+	public void setPosted(Date posted) {
 		this.posted = posted;
 	}
 
@@ -196,20 +143,28 @@ public class PlurkListItem {
 		this.avatarIndex = avatarIndex;
 	}
 
-	public String getUtcPosted() {
-		return utcPosted;
-	}
-
-	public void setUtcPosted(String utcPosted) {
-		this.utcPosted = utcPosted;
-	}
-
 	public String getRawContent() {
 		return rawContent;
 	}
 
 	public void setRawContent(String rawContent) {
 		this.rawContent = rawContent;
+	}
+
+	public int getFavorites() {
+		return favorites;
+	}
+
+	public void setFavorites(int favorites) {
+		this.favorites = favorites;
+	}
+
+	public List<String> getFavoriters() {
+		return favoriters;
+	}
+
+	public void setFavoriters(List<String> favoriters) {
+		this.favoriters = favoriters;
 	}
 
 }

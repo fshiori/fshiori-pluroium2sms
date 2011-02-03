@@ -8,8 +8,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -23,11 +21,7 @@ import android.widget.ProgressBar;
 public class LaunchActivity extends Activity implements View.OnClickListener {
 	
 	private static final String TAG = "LaunchActivity";
-	
-	/** MSG IDs */
-	private static final int MSG_LOGIN_SUCCESS = 1;
-	private static final int MSG_LOGIN_FAILED = 2;
-	
+		
 	/** Dialog IDs */
 	private static final int DIALOG_LOGIN_FAIL = 1;
 	
@@ -60,6 +54,7 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 	@Override
 	public void onStart() {
 		super.onStart();
+		
 		if (!plurkHelper.isLoginned()) {
 			initView();
 			setVisible(true);
@@ -114,7 +109,7 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
     	requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
 		
-		progressBar = (ProgressBar) findViewById(R.id.load_progressing);
+		progressBar = (ProgressBar) findViewById(R.id.title_refresh_progress);
 		
 		loginButton = (Button) findViewById(R.id.login_button);
 		loginButton.setOnClickListener(this);
@@ -141,7 +136,7 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 	 */
 	private void launchMain() {
 		
-		Class targetClass = PlurkActivity.class;
+		Class<?> targetClass = PlurkActivity.class;
 		Intent intent = new Intent();
 				
 		if (extras != null) {
@@ -177,23 +172,6 @@ public class LaunchActivity extends Activity implements View.OnClickListener {
 		loginTask = new LoginTask();
 		loginTask.execute("");
 	}
-	
-	/**
-	 * Message handler
-	 */
-	private Handler msgHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case MSG_LOGIN_SUCCESS:
-				break;
-			case MSG_LOGIN_FAILED:
-
-				break;
-			}
-			super.handleMessage(msg);
-		}
-	};
 	
 	private void toggleForm(boolean enabled) {
 		progressBar.setVisibility(enabled ? View.INVISIBLE : View.VISIBLE);

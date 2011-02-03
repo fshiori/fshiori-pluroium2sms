@@ -1,16 +1,17 @@
 package org.pluroid.pluroium;
 
-import java.util.HashMap;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import org.pluroid.pluroium.data.PlurkListItem;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,37 +27,21 @@ public class PlurkListAdapter extends BaseAdapter {
 	private Vector<PlurkListItem> plurks;
 	private Context context;
 	
-	private static HashMap<String, Integer> qualifierColorMap;
-
-	static {
-        qualifierColorMap = new HashMap<String, Integer>();
-        qualifierColorMap.put("loves", Color.rgb(0xb2, 0x0c, 0x0c));
-        qualifierColorMap.put("likes", Color.rgb(0xcb, 0x27, 0x28));
-        qualifierColorMap.put("shares", Color.rgb(0xa7, 0x49, 0x49));
-        qualifierColorMap.put("gives", Color.rgb(0x62, 0x0e, 0x0e));
-        qualifierColorMap.put("hates", Color.rgb(0x00, 0x00, 0x00));
-        qualifierColorMap.put("wants", Color.rgb(0x8d, 0xb2, 0x4e));
-        qualifierColorMap.put("wishes", Color.rgb(0x5b, 0xb0, 0x17));
-        qualifierColorMap.put("needs", Color.rgb(0x7a, 0x9a, 0x37));
-        qualifierColorMap.put("will", Color.rgb(0xb4, 0x6d, 0xb9));
-        qualifierColorMap.put("hopes", Color.rgb(0xe0, 0x5b, 0xe9));
-        qualifierColorMap.put("asks", Color.rgb(0x83, 0x61, 0xbc));
-        qualifierColorMap.put("has", Color.rgb(0x77, 0x77, 0x77));
-        qualifierColorMap.put("was", Color.rgb(0x52, 0x52, 0x52));
-        qualifierColorMap.put("wonders", Color.rgb(0x2e, 0x4e, 0x9e));
-        qualifierColorMap.put("feels", Color.rgb(0x2d, 0x83, 0xbe));
-        qualifierColorMap.put("thinks", Color.rgb(0x68, 0x9c, 0xc1));
-        qualifierColorMap.put("says", Color.rgb(0xe2, 0x56, 0x0b));
-        qualifierColorMap.put("is", Color.rgb(0xe5, 0x7c, 0x43));        
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
+	
+	class AvatarViewObject {
+        ImageView imageView;
+        Bitmap avatar;
     }
 	
 	private static class ViewHolder {
         ImageView avatar;
         ImageView lock;
-        TextView nickname;
+        TextView displayname;
         TextView qualifier;
         TextView content;
         TextView responses;
+        TextView favorites;
         TextView posted;
     }
 	
@@ -81,62 +66,82 @@ public class PlurkListAdapter extends BaseAdapter {
 	public View getView(int index, View convertView, ViewGroup parent) {
 		final int ind = index;
 		ViewHolder holder;
-		
+        final ListView parentList = (ListView) parent;
+
 		if (convertView == null) {
 			convertView = inflater.inflate(R.layout.plurk_list_item, null);
 			holder = new ViewHolder();
 			
 			holder.avatar = (ImageView) convertView.findViewById(R.id.plurk_item_avatar);
 			holder.lock = (ImageView) convertView.findViewById(R.id.plurk_item_lock);
-			holder.nickname = (TextView) convertView.findViewById(R.id.plurk_item_owner);
+			holder.displayname = (TextView) convertView.findViewById(R.id.plurk_item_displayname);
 			holder.qualifier = (TextView) convertView.findViewById(R.id.plurk_item_qualifier);
 			holder.content = (TextView) convertView.findViewById(R.id.plurk_item_content);
+			
 			holder.posted = (TextView) convertView.findViewById(R.id.plurk_item_posted);
-			holder.responses = (TextView) convertView.findViewById(R.id.plurk_item_responses);
+			holder.favorites = (TextView) convertView.findViewById(R.id.plurk_favorite_count);
+			holder.responses = (TextView) convertView.findViewById(R.id.plurk_response_count);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
 		final PlurkListItem item = plurks.get(index);
 		final ImageView iv = holder.avatar;
-		holder.avatar.setImageResource(R.drawable.avatar_unknown);
+		holder.avatar.setImageResource(R.drawable.avatar_unknown_medium);
 		new FetchAvatarTask().execute(iv, String.valueOf(item.getUserId()), item.getAvatarIndex());
 		
-		holder.nickname.setText(item.getNickname());
-        holder.qualifier.setText(item.getQualifierTranslated());
+		// display name
+		String name = item.getNickname();
+		holder.displayname.setText(name);
+		
+		// qualifier
+        String qT = item.getQualifierTranslated();
         String qualifier = item.getQualifier();
-        holder.qualifier.setTextColor(Color.WHITE);
-        if (qualifier.equals(":")) {
-        	holder.qualifier.setPadding(0, 0, 0, 0);
-        	holder.qualifier.setTextColor(Color.BLACK);
-            holder.qualifier.setBackgroundColor(Color.TRANSPARENT);
+        Resources res = context.getResources();
+
+        int colorId = res.getIdentifier("qualifier_" + qualifier, "color", "org.pluroid.pluroium");
+
+    	holder.qualifier.setText(qT);
+        if (colorId > 0) {
+        	holder.qualifier.setTextColor(Color.WHITE);
+        	holder.qualifier.setBackgroundColor(res.getColor(colorId));
         } else {
-        	holder.qualifier.setPadding(5, 0, 5, 0);
-            holder.qualifier.setBackgroundColor(qualifierColorMap.get(qualifier));
+        	holder.qualifier.setTextColor(Color.BLACK);
+        	holder.qualifier.setBackgroundColor(Color.TRANSPARENT);
         }
-        holder.content.setText(item.getContent(), TextView.BufferType.SPANNABLE);
-        holder.content.setMovementMethod(LinkMovementMethod.getInstance());
+		
+		holder.content.setText(item.getRawContent());
+        
+        int favorites = item.getFavorites();
+        int gray = Color.rgb(0x80, 0x80, 0x80);
+        
+        holder.favorites.setText(String.valueOf(favorites));
+        if (favorites == 0) {
+        	holder.favorites.setTextColor(gray);
+        } else {
+        	holder.favorites.setTextColor(Color.RED);
+        }
+        
         holder.responses.setText(String.valueOf(item.getResponses()));
         
         if (item.getHasSeen() == 0) {
-            holder.responses.setTextColor(Color.WHITE);
-            holder.responses.setBackgroundColor(Color.rgb(0xfb, 0x00, 0x47));
+            holder.responses.setTextColor(Color.RED);
         } else {
-            holder.responses.setTextColor(Color.GRAY);
-            holder.responses.setBackgroundColor(Color.TRANSPARENT);
+            holder.responses.setTextColor(gray);
         }
         
-        final ListView parentList = (ListView) parent;
         convertView.setClickable(true);
         convertView.setFocusable(true);
-        convertView.setBackgroundResource(R.drawable.menuitem_background);
+        convertView.setBackgroundResource(android.R.drawable.menuitem_background);
         convertView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 parentList.performItemClick(parentList, ind, item.getPlurkId());
             }
+            
         });
+        convertView.setLongClickable(true);
         
-        holder.posted.setText(item.getPosted());
+        holder.posted.setText(sdf.format(item.getPosted()));
         String limit = item.getLimitTo();
         holder.lock.setVisibility(limit.length() > 0 ? View.VISIBLE : View.INVISIBLE);
 

@@ -1,6 +1,5 @@
 package org.pluroid.pluroium;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,11 +9,10 @@ import java.util.TimeZone;
 
 import org.pluroid.pluroium.data.PlurkListItem;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,18 +31,18 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
-public class PlurkActivity extends Activity 
-	implements View.OnClickListener, OnItemClickListener {
+public class PlurkActivity extends ListActivity 
+	implements View.OnClickListener, OnItemClickListener, OnScrollListener {
 
 	private static final String TAG = "PlurkActivity";
 	
@@ -53,23 +51,15 @@ public class PlurkActivity extends Activity
 	private static final int REQUEST_PHOTO_PICK = 2;
 	
 	// MENU ITEM IDs
-	private static final int MENU_COMPOSE 		= Menu.FIRST;
-	private static final int MENU_REFRESH		= Menu.FIRST + 1;
-	private static final int MENU_VIEW 			= Menu.FIRST + 2;
-	private static final int MENU_UPLOAD_PHOTO 	= Menu.FIRST + 3;
-	private static final int MENU_SETTINGS 		= Menu.FIRST + 4;
-	private static final int MENU_LOGOUT 		= Menu.FIRST + 5;
+	private static final int MENU_VIEW 			= Menu.FIRST;
+	private static final int MENU_UPLOAD_PHOTO 	= Menu.FIRST + 1;
+	private static final int MENU_SETTINGS 		= Menu.FIRST + 2;
+	private static final int MENU_LOGOUT 		= Menu.FIRST + 3;
 	
 	// Context Menu
-	private static final int CONTEXT_MENU_READ = 1;
-	private static final int CONTEXT_MENU_AUTHOR = 2;
-	private static final int CONTEXT_MENU_MUTE = 3;
+	private static final int CONTEXT_MENU_READ 		= 1;
 	
-	private static final int MSG_LOADING_SUCCESS	= 1;
 	private static final int MSG_LOADING_FAIL 		= 2;
-	private static final int MSG_AVATAR_START 		= 3;
-	private static final int MSG_AVATAR_SETTING 	= 4;
-	private static final int MSG_AVATAR_LOADED 		= 5;
 	private static final int MSG_PLURK_DONE			= 6;
 	private static final int MSG_SWITCH_VIEW		= 7;
 	
@@ -81,27 +71,22 @@ public class PlurkActivity extends Activity
 	private SharedPreferences sharedPref;
 	private ArrayList<PlurkListItem> newPlurks;
 	private ListView plurkListView;
-	private TextView headerText;
+	private Spinner viewSpinner;
+	private ArrayAdapter<CharSequence> viewAdapter;
 	private PlurkListAdapter plurkListAdapter;
 	private TextView listFooter;
 	private ProgressBar progressBar;
 	private ProgressDialog plurkingDialog;
 	private AlertDialog switchViewDialog;
 	
-	private EditText plurkContent;
-	private Button plurkButton;
-
-	private PlurkHelper plurkHelper;
 	private boolean loading = false;
+	private boolean hasFooter = false;
 	private int currentPlurksView = 0;
 	
 	private static SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-	private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
-	private static SimpleDateFormat sdfa = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-	private static SimpleDateFormat sdfb = new SimpleDateFormat("HH:mm:ss", Locale.US);
+	private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
+    private static SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
 	
-	private InputMethodManager ime;
-	private MenuItem refreshItem;
 	private MenuItem switchViewItem;
 	
 	private LoadPlurksTask loadPlurksTask;
@@ -110,54 +95,45 @@ public class PlurkActivity extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        Log.v(TAG, "onCreate");
-        
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        plurkHelper = new PlurkHelper(this);
-        
-        ime = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        
+
         clearTimeStamp();        
         initView();
-		ime.hideSoftInputFromWindow(plurkContent.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-
-    	loadPlurks();
-
+        loadPlurks();
     }
     
     @Override
     protected void onStop() {
     	super.onStop();
-    	   	
+
     	if (loadPlurksTask != null) {
     		loadPlurksTask.cancel(true);
+    		progressBar.setVisibility(View.GONE);
+			loading = false;
     	}
+    }
+    
+    @Override
+    protected void onDestroy() {
+      super.onDestroy();
     }
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {    	
     	
-    	menu.add(0, MENU_COMPOSE, 0, R.string.menu_compose_title)
-    		.setIcon(android.R.drawable.ic_menu_edit);
-    	
-    	refreshItem = menu.add(0, MENU_REFRESH, 0, R.string.menu_refresh_title)
-    		.setIcon(R.drawable.ic_menu_refresh);
-    	
-    	
     	switchViewItem = menu.add(0, MENU_VIEW, 0, R.string.menu_view).setIcon(android.R.drawable.ic_menu_view);
-    	    	
+    	
     	menu.add(0, MENU_UPLOAD_PHOTO, 0, R.string.menu_upload_photo_title)
     		.setIcon(android.R.drawable.ic_menu_upload);
     	
     	menu.add(0, MENU_SETTINGS, 0, R.string.menu_preferences_title).setIcon(android.R.drawable.ic_menu_preferences);
     	
     	menu.add(0, MENU_LOGOUT, 0, R.string.menu_logout)
-    		.setIcon(android.R.drawable.ic_lock_power_off);
+    		.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
 
     	if (loading) {
-    		refreshItem.setEnabled(false);
     		switchViewItem.setEnabled(false);
     	}
     	
@@ -167,16 +143,6 @@ public class PlurkActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
-    	case MENU_COMPOSE:
-    		Intent composeIntent = new Intent(this, ComposeActivity.class);
-    		startActivity(composeIntent);
-    		break;
-    	case MENU_REFRESH:
-    		clearTimeStamp();
-    		listFooter.setText(R.string.plurk_list_loading_title);
-			refreshItem.setEnabled(false);
-    		loadPlurks();
-    		break;
     	case MENU_VIEW:
     		showDialog(DIALOG_SWITCH_VIEW);
     		break;
@@ -292,8 +258,6 @@ public class PlurkActivity extends Activity
     	int ind = 0;
     	
     	menu.add(0, CONTEXT_MENU_READ, ind++, R.string.context_menu_read_title);
-    	//menu.add(0, CONTEXT_MENU_AUTHOR, ind++, R.string.context_menu_author_title);
-    	
     }
     
     @Override
@@ -326,7 +290,7 @@ public class PlurkActivity extends Activity
     		data.putString("qualifier", plurkItem.getQualifier());
     		data.putString("qualifier_translated", plurkItem.getQualifierTranslated());
     		data.putCharSequence("content", plurkItem.getRawContent());
-    		data.putString("posted", plurkItem.getPosted());
+    		data.putString("posted", plurkItem.getPosted().toLocaleString());
     		intent.putExtras(data);
     		startActivity(intent);
     		
@@ -347,44 +311,28 @@ public class PlurkActivity extends Activity
     
     private void initView() {
         setContentView(R.layout.plurk);
-
-        headerText = (TextView) findViewById(R.id.page_title);
-        headerText.setOnClickListener(this);
         
-        LayoutInflater inflater = LayoutInflater.from(this);
-        plurkListView = (ListView) findViewById(R.id.plurk_list_view);
+        plurkListView = getListView();
         plurkListView.setItemsCanFocus(true);
         plurkListView.setClickable(true);
         plurkListView.setOnCreateContextMenuListener(this);
         plurkListView.setOnItemClickListener(this);
+        plurkListView.setOnScrollListener(this);
         plurkListAdapter = new PlurkListAdapter(this);
         
-        listFooter = (TextView) inflater.inflate(R.layout.loading_footer, null);
-        listFooter.setOnClickListener(this);
-                
+		listFooter = (TextView) LayoutInflater.from(this).inflate(R.layout.loading_footer, null);
         plurkListView.addFooterView(listFooter);
-        plurkListView.setAdapter(plurkListAdapter);
-                
-        progressBar = (ProgressBar) findViewById(R.id.load_progressing);
-        plurkButton = (Button) findViewById(R.id.plurk_button);
-        plurkButton.setOnClickListener(this);
+        listFooter.setVisibility(View.GONE);
         
-        plurkContent = (EditText) findViewById(R.id.plurk_text);
+        plurkListView.setAdapter(plurkListAdapter);
+        progressBar = (ProgressBar) findViewById(R.id.title_refresh_progress);
     }
     
     private void loadPlurks() {
     	progressBar.setVisibility(View.VISIBLE);
     	loading = true;
-    	
-    	if (refreshItem != null) {
-    		refreshItem.setEnabled(false);
-    		switchViewItem.setEnabled(false);
-    	}
-    	
-    	if (plurkButton != null) {
-    		plurkButton.setEnabled(false);
-    	}
-    	
+
+    	PlurkHelper plurkHelper = new PlurkHelper(this);
     	if (!plurkHelper.isLoginned()) {
     		startActivity(new Intent(this, LaunchActivity.class));
     		finish();
@@ -412,7 +360,7 @@ public class PlurkActivity extends Activity
 	private Handler msgHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			
+			PlurkHelper plurkHelper = new PlurkHelper(PlurkActivity.this);
 			// check if the login is required
 	        if (!plurkHelper.isLoginned()) {
 	        	performLogout();
@@ -424,11 +372,9 @@ public class PlurkActivity extends Activity
 	    		clearTimeStamp();
 				plurkingDialog.cancel();
 				listFooter.setText(R.string.plurk_list_loading_title);
-				plurkContent.getText().clear();
 	    		loadPlurks();
 				break;
 			case MSG_SWITCH_VIEW:
-				headerText.setText("Pluroid - " + getResources().getStringArray(R.array.plurk_types)[currentPlurksView]);
 	    		clearTimeStamp();
 				listFooter.setText(R.string.plurk_list_loading_title);
 				loadPlurks();
@@ -440,22 +386,10 @@ public class PlurkActivity extends Activity
 	};
 
 	public void onClick(View v) {
-		if (v == headerText) {
-			plurkListView.setSelectionFromTop(0, 0);
-			return;
-		}
-		
 		if (!loading) {
 			if (v == listFooter) {
 				listFooter.setText(R.string.plurk_list_loading_title);
 				loadPlurks();
-			} else if (v == plurkButton) {
-				if (ime != null) {
-					ime.hideSoftInputFromWindow(plurkContent.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-				}
-				
-				showDialog(DIALOG_PLURKING);
-				new PlurkTask().execute("");
 			} 
 		}	
 	}
@@ -463,7 +397,7 @@ public class PlurkActivity extends Activity
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Intent intent = new Intent(PlurkActivity.this, SinglePlurkActivity.class);
 		PlurkListItem item = (PlurkListItem) plurkListAdapter.getItem(position);
-		
+
 		Bundle data = new Bundle();
 		data.putString("plurk_id", String.valueOf(item.getPlurkId()));
 		data.putString("userId", String.valueOf(item.getUserId()));
@@ -472,8 +406,8 @@ public class PlurkActivity extends Activity
 		data.putString("nickname", item.getNickname());
 		data.putString("qualifier", item.getQualifier());
 		data.putString("qualifier_translated", item.getQualifierTranslated());
-		data.putCharSequence("content", item.getRawContent());
-		data.putString("posted", item.getPosted());
+		data.putCharSequence("content", item.getContent());
+		data.putString("posted", sdf2.format(item.getPosted()));
 		intent.putExtras(data);
 		startActivity(intent);
 	}
@@ -493,22 +427,19 @@ public class PlurkActivity extends Activity
     	        timeOffset = sdf.format(nowDate);
 			} else {
 				nowDate = new Date(Long.parseLong(timeStart)-offset);
-    			timeOffset = sdf2.format(nowDate);
+    			timeOffset = sdf3.format(nowDate);
 			}
 	        
 			// Don't try to query for more than 20. Otherwise plurk.com will return only private/personal plurks.
+			PlurkHelper plurkHelper = new PlurkHelper(PlurkActivity.this);
 	        newPlurks = plurkHelper.getPlurks(currentPlurksView, 20, timeOffset);
 	        if (newPlurks != null) {
 	        	int size = newPlurks.size();
 				if (size > 0) {
-					String utcPosted = newPlurks.get(size-1).getUtcPosted();				
+					Date utcPost = newPlurks.get(size-1).getPosted();				
 					Editor prefEdit = sharedPref.edit();
-					try {
-						prefEdit.putString(Constant.LAST_TIME, String.valueOf(sdf.parse(utcPosted).getTime()));
-						prefEdit.commit();
-					} catch (ParseException e) {
-						Log.e(TAG, "parse date error!");
-					}	
+					prefEdit.putString(Constant.LAST_TIME, String.valueOf(utcPost.getTime()));
+					prefEdit.commit();	
 				}
     	        return true;
 	        } else {
@@ -520,44 +451,51 @@ public class PlurkActivity extends Activity
 		@Override
         protected void onPostExecute(Boolean isOk) {
 			if (isOk) {
-				progressBar.setVisibility(View.INVISIBLE);
 				plurkListAdapter.addPlurks(newPlurks);
-				listFooter.setText(R.string.plurk_list_more_title);
-				
-				loading = false;
-				progressBar.setVisibility(View.INVISIBLE);
-				if (refreshItem != null) {
-					refreshItem.setEnabled(true);
-		    		switchViewItem.setEnabled(true);
-				}
-				if (plurkButton != null) {
-					plurkButton.setEnabled(true);
-				}
+				//listFooter.setText(R.string.plurk_list_more_title);				
 			} else {
-				loading = false;
-				if (refreshItem != null) {
-					refreshItem.setEnabled(true);
-		    		switchViewItem.setEnabled(true);
-				}
-				if (plurkButton != null) {
-					plurkButton.setEnabled(true);
-				}
-				progressBar.setVisibility(View.INVISIBLE);
-				listFooter.setText(R.string.plurk_list_more_title);
+				//listFooter.setText(R.string.plurk_list_more_title);
 			}
+			
+			loading = false;
+			progressBar.setVisibility(View.GONE);
+			listFooter.setVisibility(View.GONE);
 		}
 		
 	}
-	
-	private class PlurkTask extends AsyncTask<String, Integer, String> {
 
-		@Override
-		protected String doInBackground(String... arg0) {
-			plurkHelper.addPlurk("says", plurkContent.getText().toString(), true);
-			msgHandler.sendEmptyMessage(MSG_PLURK_DONE);
-			
-			return null;
+	/**
+	 * Refresh button on the title 
+	 * @param view
+	 */
+	public void onRefreshClick(View view) {
+		if (!loading) {
+			clearTimeStamp();
+		    loadPlurks();
 		}
+	}
+	
+	/**
+	 * Compose title button
+	 */
+	public void onComposeClick(View view) {		
+		Intent composeIntent = new Intent(this, ComposeActivity.class);
+		startActivity(composeIntent);
+	}
+
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		
+		if (!loading) {
+			if (visibleItemCount < totalItemCount && 
+					totalItemCount - 1 <= firstVisibleItem + visibleItemCount) {
+				listFooter.setVisibility(View.VISIBLE);
+				loadPlurks();
+			}
+		}
+	}
+
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
 		
 	}
 }

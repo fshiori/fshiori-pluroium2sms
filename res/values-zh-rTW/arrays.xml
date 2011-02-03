@@ -2,11 +2,12 @@
 <resources>
 
     <string-array name="plurk_types">
-        <item>所有的 plurk</item>
-        <item>我的 plurk</item>
-        <item>私人的</item>
-        <item>回應過的</item>
-        <item>未讀的</item>
+        <item>所有訊息</item>
+        <item>我發表的訊息</item>
+        <item>私人訊息</item>
+        <item>回應過的訊息</item>
+        <item>未讀的訊息</item>
+        <item>喜歡的訊息</item>
     </string-array>
     
     <string-array name="qualifiers">
@@ -192,4 +193,18 @@
         <item>(taser)</item>
     </string-array>
     
+    <string-array name="compose_camera_options">
+        <item>拍張照片</item>
+        <item>從圖片庫中挑選</item>
+    </string-array>
+    
+    <string-array name="compose_location_options">
+        <item>取得現在位址</item>
+    </string-array>
+
+    <string-array name="pref_resize_option_titles">
+        <item>不縮圖</item>
+        <item>中等大小 (640px)</item>
+        <item>縮成小圖 (240px)</item>
+    </string-array>
 </resources>
