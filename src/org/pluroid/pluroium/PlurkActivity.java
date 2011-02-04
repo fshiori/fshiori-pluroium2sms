@@ -69,14 +69,14 @@ public class PlurkActivity extends ListActivity
     private static final int MENU_VIEW             = Menu.FIRST;
     private static final int MENU_UPLOAD_PHOTO     = Menu.FIRST + 1;
     private static final int MENU_SETTINGS         = Menu.FIRST + 2;
-    private static final int MENU_LOGOUT         = Menu.FIRST + 3;
+    private static final int MENU_LOGOUT           = Menu.FIRST + 3;
     
     // Context Menu
-    private static final int CONTEXT_MENU_READ         = 1;
+    private static final int CONTEXT_MENU_READ     = 1;
     
-    private static final int MSG_LOADING_FAIL         = 2;
-    private static final int MSG_PLURK_DONE            = 6;
-    private static final int MSG_SWITCH_VIEW        = 7;
+    private static final int MSG_LOADING_FAIL	= 2;
+    private static final int MSG_PLURK_DONE     = 6;
+    private static final int MSG_SWITCH_VIEW    = 7;
     
     // Dialog IDs
     private static final int DIALOG_CONFIRM_LOGOUT = 1;
@@ -97,6 +97,7 @@ public class PlurkActivity extends ListActivity
     
     private static SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
     private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
+    // for the `responded plurks` (ericsk: strange...)
     private static SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
     
     private MenuItem switchViewItem;
@@ -398,21 +399,23 @@ public class PlurkActivity extends ListActivity
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(PlurkActivity.this, SinglePlurkActivity.class);
-        PlurkListItem item = (PlurkListItem) plurkListAdapter.getItem(position);
-
-        Bundle data = new Bundle();
-        data.putString("plurk_id", String.valueOf(item.getPlurkId()));
-        data.putString("userId", String.valueOf(item.getUserId()));
-        data.putString("avatar_index", item.getAvatarIndex());
-        data.putParcelable("avatar", item.getAvatar());
-        data.putString("nickname", item.getNickname());
-        data.putString("qualifier", item.getQualifier());
-        data.putString("qualifier_translated", item.getQualifierTranslated());
-        data.putCharSequence("content", item.getContent());
-        data.putString("posted", sdf2.format(item.getPosted()));
-        intent.putExtras(data);
-        startActivity(intent);
+    	PlurkListItem item = (PlurkListItem) plurkListAdapter.getItem(position);
+    	if (item != null) {
+	        Intent intent = new Intent(PlurkActivity.this, SinglePlurkActivity.class);
+	
+	        Bundle data = new Bundle();
+	        data.putString("plurk_id", String.valueOf(item.getPlurkId()));
+	        data.putString("userId", String.valueOf(item.getUserId()));
+	        data.putString("avatar_index", item.getAvatarIndex());
+	        data.putParcelable("avatar", item.getAvatar());
+	        data.putString("nickname", item.getNickname());
+	        data.putString("qualifier", item.getQualifier());
+	        data.putString("qualifier_translated", item.getQualifierTranslated());
+	        data.putCharSequence("content", item.getContent());
+	        data.putString("posted", sdf2.format(item.getPosted()));
+	        intent.putExtras(data);
+	        startActivity(intent);
+    	}
     }
     
     private class LoadPlurksTask extends AsyncTask<String, Integer, Boolean> {
@@ -455,9 +458,8 @@ public class PlurkActivity extends ListActivity
         protected void onPostExecute(Boolean isOk) {
             if (isOk) {
                 plurkListAdapter.addPlurks(newPlurks);
-                //listFooter.setText(R.string.plurk_list_more_title);                
             } else {
-                //listFooter.setText(R.string.plurk_list_more_title);
+            	// TODO: while the `get plurks` task failed...
             }
             
             loading = false;

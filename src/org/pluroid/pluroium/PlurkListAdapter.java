@@ -72,11 +72,19 @@ public class PlurkListAdapter extends BaseAdapter {
     }
 
     public PlurkListItem getItem(int index) {
-        return plurks.get(index);
+    	PlurkListItem ret = null;
+    	if (index < plurks.size()) {
+    		ret = plurks.get(index);
+    	}
+        return ret;
     }
 
     public long getItemId(int item) {
-        return plurks.get(item).getPlurkId();
+    	long id = 0;
+    	if (item < plurks.size()) {
+    		id = plurks.get(item).getPlurkId();
+    	}
+        return id;
     }
 
     public View getView(int index, View convertView, ViewGroup parent) {
