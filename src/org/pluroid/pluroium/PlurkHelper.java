@@ -25,12 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,9 +39,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -53,23 +46,13 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.scheme.LayeredSocketFactory;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.scheme.SocketFactory;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,8 +65,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -103,14 +86,9 @@ public class PlurkHelper {
     private DefaultHttpClient httpClient;
     private BasicCookieStore cookieStore;
     private ClientConnectionManager connMgr;
-
-    // HTTP client parameters
-    // TCP timeouts
-    private final static int CONNECT_TIMEOUT = 20000;
-    private final static int READ_TIMEOUT = 45000;
     
     public static final int REGISTRATION_TIMEOUT = 30 * 1000; // ms
-    public static final String USER_AGENT = "Pluroid/2.0";
+    public static final String USER_AGENT = "Pluroium/2.0";
     private static SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 
     // API URI
@@ -121,99 +99,6 @@ public class PlurkHelper {
     private static final String GET_RESPONSES_URL = "/Responses/get";
     private static final String RESPOND_PLURK_URL = "/Responses/responseAdd";
     private static final String UPLOAD_PHOTO_URL = "/Timeline/uploadPicture";
-    
-    /**
-     * SSL Socket factory 
-     */
-    private static class MySSLSocketFactory implements SocketFactory, LayeredSocketFactory {
-        /**
-         * Constructor
-         */
-        public MySSLSocketFactory() {
-            if( m_sslSocketFactory == null) {
-                try {
-                    SSLContext sc = SSLContext.getInstance("TLS");
-                    sc.init(null, null, null);
-                    m_sslSocketFactory = sc.getSocketFactory();
-                } catch( Exception ex) {
-                }
-            }
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see org.apache.http.conn.scheme.SocketFactory#connectSocket(java.net.Socket, java.lang.String, int, java.net.InetAddress, int, org.apache.http.params.HttpParams)
-         */
-        public Socket connectSocket( Socket socket, String host, int port, InetAddress localAddress, int localPort, HttpParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
-            if(socket == null) {
-                socket = createSocket();
-            }
-            if( (localAddress != null) || (localPort > 0)) {
-                if( localPort < 0) {
-                    localPort = 0; // indicates "any"
-                }
-                socket.bind( new InetSocketAddress( localAddress, localPort));
-            }
-            socket.setSoTimeout( HttpConnectionParams.getSoTimeout( params));
-            socket.connect( new InetSocketAddress( host, port), HttpConnectionParams.getConnectionTimeout( params));
-            return socket;
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see org.apache.http.conn.scheme.SocketFactory#createSocket()
-         */
-        public Socket createSocket() throws IOException {
-            return m_sslSocketFactory.createSocket();
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see org.apache.http.conn.scheme.LayeredSocketFactory#createSocket(java.net.Socket, java.lang.String, int, boolean)
-         */
-        public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
-            return m_sslSocketFactory.createSocket();
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see org.apache.http.conn.scheme.SocketFactory#isSecure(java.net.Socket)
-         */
-        public boolean isSecure(Socket socket) throws IllegalArgumentException {
-            return true;
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
-        @Override
-        public boolean equals(Object obj) {
-            return((obj != null) && obj.getClass().equals( MySSLSocketFactory.class));
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see java.lang.Object#hashCode()
-         */
-        @Override
-        public int hashCode() {
-            return MySSLSocketFactory.class.hashCode();
-        }
-
-        /**
-         * Member variables
-         */
-        private static SSLSocketFactory m_sslSocketFactory;
-    }
-    
-    private static final SchemeRegistry m_supportedSchemes = new SchemeRegistry();
-    static {
-        // Setup the schemes
-        // Register the "http" and "https" protocol schemes, they are required by the default operator to look up socket factories.
-        m_supportedSchemes.register( new Scheme( "http", PlainSocketFactory.getSocketFactory(), 80));
-        m_supportedSchemes.register( new Scheme( "https", new MySSLSocketFactory(), 443));
-    }
     
     // URL shorten options
     public static final int URL_SHORTEN_GOOGL = 0;
@@ -228,12 +113,8 @@ public class PlurkHelper {
     
     private void createHttpClient() {
         if (httpClient == null) {
-            HttpParams params = new BasicHttpParams();
-            params.setParameter( "http.socket.timeout", new Integer( READ_TIMEOUT));
-            params.setParameter( "http.connection.timeout", new Integer( CONNECT_TIMEOUT));
-            connMgr = new SingleClientConnManager( params, m_supportedSchemes);
-    
-            httpClient = new DefaultHttpClient(connMgr, params);
+        	connMgr = HttpClientFactory.createConnectionManager();
+            httpClient = HttpClientFactory.createHttpClient(connMgr);
             cookieStore = new BasicCookieStore();
             
             String cookieStr = sharedPref.getString(Constant.PREF_COOKIE, "");
