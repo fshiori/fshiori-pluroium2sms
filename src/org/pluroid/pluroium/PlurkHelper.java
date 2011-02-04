@@ -74,7 +74,7 @@ import android.util.Log;
 public class PlurkHelper {
     
     private static final String TAG = "PlurkHelper";
-    private static final String API_KEY = "PUT_YOUR_KEY_HERE";
+    private static final String API_KEY = "5RxREItWmVXGNvzaMTiwGgWIGpKfMAd3";
     private SharedPreferences sharedPref;
 
     private Context context;

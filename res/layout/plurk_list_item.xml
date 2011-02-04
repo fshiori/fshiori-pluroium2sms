@@ -83,9 +83,7 @@
             android:textSize="11dip"
             android:text="0" />
         
-        <TextView
-	        android:textSize="11dip"
-	        android:textColor="#808080"
+        <TextView style="@style/MetaContentText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/list_item_responses" />
@@ -96,8 +94,7 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_marginRight="3dip"
-            android:textSize="11dip"
-            android:textColor="#f00"
+            style="@style/MetaContentText"
 	        android:text="0" />
 	    
         <TextView

@@ -104,17 +104,32 @@
         <item name="android:textSize">14dip</item>
     </style>
     
-  <style name="textCaption">
-     <item name="android:textSize">18dip</item>
-     <item name="android:textStyle">bold</item>
-  </style>
+    <style name="textCaption">
+        <item name="android:textSize">18dip</item>
+        <item name="android:textStyle">bold</item>
+    </style>
   
-  <style name="FormLabel">
-     <item name="android:layout_width">wrap_content</item>
-       <item name="android:layout_height">wrap_content</item>
-     <item name="android:textStyle">bold</item>
-     <item name="android:layout_marginRight">6dip</item>
-  </style>
+    <style name="FormLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginRight">6dip</item>
+    </style>
   
+    <style name="MetaContentText">
+        <item name="android:textColor">#ff808080</item>
+        <item name="android:textSize">11dip</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="ResponsesCountText" parent="@style/MetaContentText">
+        <item name="android:textColor">#ffff0000</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FavoritesCountText" parent="@style/MetaContentText">
+        <item name="android:textColor">#ff009000</item>
+        <item name="android:textStyle">bold</item>
+    </style>
   
 </resources>

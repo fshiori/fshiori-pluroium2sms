@@ -137,21 +137,20 @@ public class PlurkListAdapter extends BaseAdapter {
         holder.content.setText(item.getRawContent());
         
         int favorites = item.getFavorites();
-        int gray = Color.rgb(0x80, 0x80, 0x80);
         
         holder.favorites.setText(String.valueOf(favorites));
         if (favorites == 0) {
-            holder.favorites.setTextColor(gray);
+        	holder.favorites.setTextAppearance(context, R.style.MetaContentText);
         } else {
-            holder.favorites.setTextColor(Color.RED);
+        	holder.favorites.setTextAppearance(context, R.style.FavoritesCountText);
         }
         
         holder.responses.setText(String.valueOf(item.getResponses()));
         
         if (item.getHasSeen() == 0) {
-            holder.responses.setTextColor(Color.RED);
+            holder.responses.setTextAppearance(context, R.style.ResponsesCountText);
         } else {
-            holder.responses.setTextColor(gray);
+            holder.responses.setTextAppearance(context, R.style.MetaContentText);
         }
         
         convertView.setClickable(true);
