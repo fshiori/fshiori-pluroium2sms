@@ -88,7 +88,6 @@ public class PlurkActivity extends ListActivity
     private ListView plurkListView;
     private PlurkListAdapter plurkListAdapter;
     private TextView listFooter;
-    private ProgressBar progressBar;
     private ProgressDialog plurkingDialog;
     private AlertDialog switchViewDialog;
     
@@ -123,7 +122,6 @@ public class PlurkActivity extends ListActivity
 
         if (loadPlurksTask != null) {
             loadPlurksTask.cancel(true);
-            progressBar.setVisibility(View.GONE);
             loading = false;
         }
     }
@@ -329,11 +327,9 @@ public class PlurkActivity extends ListActivity
         listFooter.setVisibility(View.GONE);
         
         plurkListView.setAdapter(plurkListAdapter);
-        progressBar = (ProgressBar) findViewById(R.id.title_refresh_progress);
     }
     
     private void loadPlurks() {
-        progressBar.setVisibility(View.VISIBLE);
         loading = true;
 
         PlurkHelper plurkHelper = new PlurkHelper(this);
@@ -463,7 +459,6 @@ public class PlurkActivity extends ListActivity
             }
             
             loading = false;
-            progressBar.setVisibility(View.GONE);
             listFooter.setVisibility(View.GONE);
         }
         

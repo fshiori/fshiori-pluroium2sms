@@ -26,10 +26,6 @@
 
         <View style="@style/TitleBarSpring" />
 
-        <ProgressBar style="@style/TitleBarProgressIndicator"
-            android:id="@+id/title_refresh_progress"
-            android:visibility="gone" />
-
         <ImageView style="@style/TitleBarSeparator" />
 
         <ImageButton style="@style/TitleBarAction"
