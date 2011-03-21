@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium.service;
+package org.pluroid.pluroium2sms.service;
 
-import org.pluroid.pluroium.PlurkActivity;
-import org.pluroid.pluroium.PlurkHelper;
-import org.pluroid.pluroium.R;
+import org.pluroid.pluroium2sms.PlurkActivity;
+import org.pluroid.pluroium2sms.PlurkHelper;
+import org.pluroid.pluroium2sms.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium;
+package org.pluroid.pluroium2sms;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.pluroid.pluroium.data.PlurkListItem;
+import org.pluroid.pluroium2sms.data.PlurkListItem;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -105,8 +105,7 @@ public class PlurkActivity extends ListActivity
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
+        super.onCreate(savedInstanceState); 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -276,13 +275,14 @@ public class PlurkActivity extends ListActivity
         
         PlurkListItem plurkItem = plurkListAdapter.getItem(info.position);
         
-        Intent intent = new Intent();
-        Bundle data;
+        //Intent intent = new Intent();
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        //Bundle data;
         
         switch (item.getItemId()) {
         case CONTEXT_MENU_READ:
-            intent.setClass(PlurkActivity.this, SinglePlurkActivity.class);
-            
+            //intent.setClass(PlurkActivity.this, SinglePlurkActivity.class);
+            /*
             data = new Bundle();
             data.putString("plurk_id", String.valueOf(plurkItem.getPlurkId()));
             data.putString("userId", String.valueOf(plurkItem.getUserId()));
@@ -294,6 +294,10 @@ public class PlurkActivity extends ListActivity
             data.putCharSequence("content", plurkItem.getRawContent());
             data.putString("posted", plurkItem.getPosted().toLocaleString());
             intent.putExtras(data);
+            */
+        	
+    		intent.putExtra("sms_body", plurkItem.getRawContent());
+    		intent.setType("vnd.android-dir/mms-sms");              
             startActivity(intent);
             
             return true;

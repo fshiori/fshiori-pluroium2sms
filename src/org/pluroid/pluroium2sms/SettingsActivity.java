@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium.service;
+package org.pluroid.pluroium2sms;
 
-oneway interface IUploadServiceCallback {
-    void uploaded(int value);
+import android.os.Bundle;
+import android.preference.PreferenceActivity;
+
+public class SettingsActivity extends PreferenceActivity {
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    
 }

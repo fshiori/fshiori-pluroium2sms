@@ -15,7 +15,7 @@
 -->
 
 <resources>
-    <string name="app_name">Pluroium</string>
+    <string name="app_name">Pluroium2SMS</string>
     
     <string name="plurk">Plurk</string>
     <string name="ok">Ok</string>
@@ -24,10 +24,10 @@
     <string name="loading">Loading...</string>
     
     <!-- headers -->
-    <string name="header_login">Pluroium - Login</string>
-    <string name="header_all">Pluroium - All plurks</string>
-    <string name="header_compose">Pluroium - Compose a plurk</string>
-    <string name="header_sharephoto">Pluroium - Share a photo</string>
+    <string name="header_login">Pluroium2SMS - Login</string>
+    <string name="header_all">Pluroium2SMS- All plurks</string>
+    <string name="header_compose">Pluroium2SMS - Compose a plurk</string>
+    <string name="header_sharephoto">Pluroium2SMS - Share a photo</string>
     <string name="description_refresh">Refresh</string>
     
     <!-- LaunchActivity -->
@@ -54,7 +54,7 @@
     <string name="menu_preferences_title">Settings</string>
     <string name="menu_logout">Log out</string>
     
-    <string name="context_menu_read_title">Read plurk</string>
+    <string name="context_menu_read_title">Plurk 2 SMS</string>
     <string name="context_menu_author_title">View author info...</string>
     <string name="context_menu_favorite_title">Mark as favorite</string>
     <string name="context_menu_unfavorite_title">Mark as unfavorite</string>

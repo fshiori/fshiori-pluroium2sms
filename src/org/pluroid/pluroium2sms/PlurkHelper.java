@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium;
+package org.pluroid.pluroium2sms;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -56,7 +56,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pluroid.pluroium.data.PlurkListItem;
+import org.pluroid.pluroium2sms.data.PlurkListItem;
 
 import android.content.Context;
 import android.content.SharedPreferences;

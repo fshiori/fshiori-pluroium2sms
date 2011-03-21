@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium.service;
+package org.pluroid.pluroium2sms.service;
 
-import org.pluroid.pluroium.service.IUploadServiceCallback;
-
-interface IUploadService {
-
-    void registerCallback(IUploadServiceCallback callback);
-    
-    void unregisterCallback(IUploadServiceCallback callback);
-
+oneway interface IUploadServiceCallback {
+    void uploaded(int value);
 }

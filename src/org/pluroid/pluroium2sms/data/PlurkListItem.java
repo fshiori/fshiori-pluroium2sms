@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium.data;
+package org.pluroid.pluroium2sms.data;
 
 import java.util.ArrayList;
 import java.util.Date;

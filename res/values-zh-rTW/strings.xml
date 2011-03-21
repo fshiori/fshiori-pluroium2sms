@@ -15,7 +15,7 @@
 -->
 
 <resources>
-    <string name="app_name">Pluroium</string>
+    <string name="app_name">Pluroium2SMS</string>
     
     <string name="plurk">Plurk</string>
     <string name="ok">確定</string>
@@ -24,10 +24,10 @@
     <string name="loading">讀取中...</string>
     
     <!-- headers -->
-    <string name="header_login">Pluroium - 登入</string>
-    <string name="header_all">Pluroium - 所有的 plurk</string>
-    <string name="header_compose">Pluroium - 編寫 plurk</string>
-    <string name="header_sharephoto">Pluroium - 分享圖片</string>
+    <string name="header_login">Pluroium2SMS - 登入</string>
+    <string name="header_all">Pluroium2SMS - 所有的 plurk</string>
+    <string name="header_compose">Pluroium2SMS - 編寫 plurk</string>
+    <string name="header_sharephoto">Pluroium2SMS - 分享圖片</string>
     <string name="description_refresh">更新 Plurks</string>
     
     
@@ -55,7 +55,7 @@
     <string name="menu_preferences_title">偏好設定</string>
     <string name="menu_logout">登出</string>
 
-    <string name="context_menu_read_title">繼續閱讀</string>
+    <string name="context_menu_read_title">傳送plurk到SMS</string>
     <string name="context_menu_author_title">瀏覽作者資訊...</string>
     <string name="context_menu_favorite_title">喜歡</string>
     <string name="context_menu_unfavorite_title">收回喜歡</string>

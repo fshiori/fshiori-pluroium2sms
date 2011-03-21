@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium;
+package org.pluroid.pluroium2sms;
 
 import java.io.File;
 import java.io.IOException;

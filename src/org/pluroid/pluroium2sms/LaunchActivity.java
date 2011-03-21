@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium;
+package org.pluroid.pluroium2sms;
 
 import android.app.Activity;
 import android.app.AlertDialog;

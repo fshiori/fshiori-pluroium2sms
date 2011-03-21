@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium;
+package org.pluroid.pluroium2sms;
 
 import java.util.List;
 
-import org.pluroid.pluroium.data.PlurkListItem;
+import org.pluroid.pluroium2sms.data.PlurkListItem;
 
 import android.app.Activity;
 import android.app.Dialog;

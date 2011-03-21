@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.pluroid.pluroium;
+package org.pluroid.pluroium2sms;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.pluroid.pluroium.data.PlurkListItem;
+import org.pluroid.pluroium2sms.data.PlurkListItem;
 
 import android.content.Context;
 import android.content.res.Resources;
