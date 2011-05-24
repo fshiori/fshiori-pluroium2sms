@@ -78,7 +78,7 @@ public class SharePhotoActivity extends Activity
 
     public void onClick(View v) {
         if (v == uploadButton) {
-            Intent uploadIntent = new Intent("org.pluroid.pluroium.UPLOAD_SERVICE");
+            Intent uploadIntent = new Intent("org.pluroid.pluroium.service.UPLOAD_SERVICE");
             Bundle data = new Bundle();
             data.putParcelable("photo_uri", photoUri);
             data.putString("photo_text", photoText.getText().toString());

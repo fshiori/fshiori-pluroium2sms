@@ -17,8 +17,11 @@
 package org.pluroid.pluroium2sms;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -34,7 +37,8 @@ public class Utils {
     
     private static final float MEDIUM_SIZE = 640.0f;    
     private static final float SMALL_SIZE = 240.0f;
-    
+    private static final int IO_BUFFER_SIZE = 4 * 1024;
+
     private static File getCacheDirectory(Context context, String dirname) {
         
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -63,6 +67,15 @@ public class Utils {
         }   
         return cacheDirectory;
     }
+
+    private static void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] b = new byte[IO_BUFFER_SIZE];
+        int read;
+     
+        while ((read = in.read(b)) != -1) {
+            out.write(b, 0, read);
+        }
+    }
     
     public static File resizePhoto(Context context, String filePath, String resize) throws IOException {
         BitmapFactory.Options option;
@@ -84,7 +97,12 @@ public class Utils {
         float newSize = "no".equals(resize) ? 0.0f : "medium".equals(resize) ? MEDIUM_SIZE : SMALL_SIZE;
         
         if (newSize == 0.0f) {
-            return new File(filePath);
+            FileInputStream fis = new FileInputStream(filePath);
+            FileOutputStream fos = new FileOutputStream(newFilePath);
+            copy(fis, fos);
+            fis.close();
+            fos.close();
+            return newFilePath;
         } else {
             if (w > h && w >= newSize) {
                 rw = (int) newSize;
